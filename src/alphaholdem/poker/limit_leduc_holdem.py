@@ -28,7 +28,7 @@ class LimitLeducHoldem(PokerGame):
             num_hole_cards=1,
             verbose=verbose,
             num_runs=num_runs,
-            raise_pot_size=[0.75, 0.25, 1.0, 1.25],
+            raise_pot_size=[0.75],
             showdown_street=showdown_street,
             custom_board_cards=custom_board_cards,
             custom_player_hole_cards=custom_player_hole_cards,
@@ -52,7 +52,6 @@ class LimitLeducHoldem(PokerGame):
                 raise_pot = raise_pot,
                 raise_to = raise_chip + self.player_street_bet[player],
             ))
-            legal_actions.extend([None, None, None])
         else:
-            legal_actions.extend([None, None, None, None])
+            legal_actions.append(None)
         return legal_actions

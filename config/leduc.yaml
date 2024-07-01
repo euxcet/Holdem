@@ -1,14 +1,14 @@
 game:
-  type: hunl
+  type: leduc
   num_players: 2
   showdown_street: showdown
-  legal_raise_pot_size: [0.5, 0.75, 1, 1.5, 2]
-  num_runs: 100
-  initial_chips: 200
-  payoff_max: 200
+  legal_raise_pot_size: []
+  num_runs: 20
+  initial_chips: 100
+  payoff_max: 15
   circular_train: false
   custom_board_cards: null
-  num_action: 9
+  num_action: 5
 
 resources:
   num_cpus: 64
@@ -46,12 +46,12 @@ hyper:
   stop_training_iteration: 400000
 
 self_play:
-  type: hunl
+  type: leduc
   opponent_policies: [random]
   num_opponent_limit: 10
   num_update_iter: 3
   win_rate_window_size: 6
-  arena_runs: 8192
+  arena_runs: 1024
 
 policy:
   alphaholdem: /home/clouduser/zcc/Holdem/checkpoint/38000_model/model.ckpt

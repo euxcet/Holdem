@@ -1,6 +1,6 @@
-# AlphaHoldem Pytroch
+# Holdem
 
-尝试将AlphaHoldem移植到最新的pytorch版本下。
+使用强化学习训练德州扑克的智能体。
 
 ## 部署
 
@@ -55,19 +55,31 @@ pdm config pypi.url https://pypi.tuna.tsinghua.edu.cn/simple/
 pip install --force-reinstall dist/alphaholdem-*-py3-none-any.whl
 ```
 
+如果需要做开发，建议使用编辑模式来导入项目：
+
+```bash
+# pip
+pip install -e PATH_TO_THIS_FOLDER
+# pdm
+pdm add --dev -e PATH_TO_THIS_FOLDER
+```
+
 **请不要将包提交到公开pypi server**。
 
 ### 使用
 
-进行一次随机的游戏：
+训练
 
 ```bash
-pdm run game
+pdm run train
 ```
 
 ### TODO
 
-- [ ] 实现双人翻前All-in or Fold策略训练
-- [ ] wandb可视化
-- [ ] 不同self-play算法
-- [ ] Trinal-Clip loss
+- [x] leduc, texas游戏环境
+- [x] wandb训练可视化
+- [x] self play
+- [ ] 改进loss
+- [ ] 分阶段训练
+- [ ] 维护双方range
+- [ ] 多人德州

@@ -4,9 +4,8 @@ from .policy import Policy
 from ...poker.component.observation import Observation
 
 class CFRLeducPolicy(Policy):
-    def __init__(self, p0_policy_path: str, p1_policy_path: str) -> None:
-        self.policy = self._load_from_file(p0_policy_path)
-        self.policy.update(self._load_from_file(p1_policy_path))
+    def __init__(self, strategy_path: str) -> None:
+        self.policy = self._load_from_file(strategy_path)
 
     def _load_from_file(self, path: str) -> dict[str, list[float]]:
         result = dict()
@@ -41,7 +40,7 @@ class CFRLeducPolicy(Policy):
 
     @override
     def sample_action(self, env_obs: dict, game_obs: Observation) -> int:
-        policy = self.get_policy(env_obs)
+        policy = self.get_policy(env_obs, game_obs)
         return np.random.choice(len(policy), p=policy)
 
     # Fold Check Call NONE Raise NONE NONE NONE
@@ -49,7 +48,7 @@ class CFRLeducPolicy(Policy):
     @override
     def get_policy(self, env_obs: dict, game_obs: Observation) -> list[float]:
         cfr_policy = self.policy[self._get_history(env_obs)]
-        policy = [0.0] * 8
+        policy = [0.0] * 5
         # raise
         policy[4] = cfr_policy[0]
         # check or call

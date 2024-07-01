@@ -14,9 +14,9 @@ from pettingzoo.utils import wrappers
 from .poker.component.card import Card
 from .poker.component.street import Street
 from .model.hunl_conv_model_action_8 import HUNLConvModel
-from .callback.hunl_self_play_callback_deprecated import create_hunl_self_play_callback
+from .callback.deprecated.hunl_self_play_callback_deprecated import create_hunl_self_play_callback
 from .callback.leduc_self_play_callback import create_leduc_self_play_callback
-from .callback.leduc_play_with_best_callback import create_leduc_play_with_best_callback
+from .callback.deprecated.leduc_play_with_best_callback import create_leduc_play_with_best_callback
 from .policy.hunl.policy import RandomHeuristic, LeducCFRHeuristic
 from .poker.poker_game_env import PokerGameEnv
 from .poker.no_limit_leduc_holdem_env import NoLimitLeducHoldemEnv
@@ -30,9 +30,6 @@ def wrap(env: PokerGameEnv):
     env = wrappers.OrderEnforcingWrapper(env)
     return env
 
-def select_policy(agent_id: str, episode: EpisodeV2, **kwargs):
-    return ("learned" if episode.episode_id % 2 == int(agent_id[-1:])
-            else random.choice(["random"]))
 
 def main():
     parser = argparse.ArgumentParser()
@@ -95,9 +92,12 @@ def main():
     initial_policies = {
         learned_policy: PolicySpec(),
         "random": PolicySpec(policy_class=RandomHeuristic),
-        # "cfr": PolicySpec(policy_class=LeducCFRHeuristic),
     }
     opponent_policies = list(initial_policies.keys() - [learned_policy])
+
+    def select_policy(agent_id: str, episode: EpisodeV2, **kwargs):
+        return ("learned" if episode.episode_id % 2 == int(agent_id[-1:])
+                else random.choice(["random"]))
 
     config = (
         PPOConfig()
@@ -127,7 +127,7 @@ def main():
                 opponent_count=args.opponent_count,
                 num_update_iter=args.num_update_iter,
                 payoff_max=args.payoff_max,
-                cfr=CFRLeducPolicy('strategy/player0.txt', 'strategy/player1.txt')
+                cfr=CFRLeducPolicy('strategy/leduc.txt')
             )
         )
         .evaluation(evaluation_interval=1)

@@ -9,26 +9,6 @@ class TFTexasPolicy(Policy):
         self.model = Predictor()
         self.model.init_model(model_path=model_path)
 
-        # obs=np.zeros(312+1872+10)
-        # obs[0:312]=self.envhands.reshape(312)
-        # obs[312:312+468]=self.action_record0.reshape(468)
-        # obs[312+468:312+468*2]=self.action_record1.reshape(468)
-        # obs[312+468*2:312+468*3]=self.action_record2.reshape(468)
-        # obs[312+468*3:312+468*4]=self.action_record3.reshape(468)
-        # obs[1872+312:1872+312+9]=legal_action
-        # obs[1872+312+9]=self.player_id
-
-        # self.player1hand=np.zeros((4,13))
-        # self.player2hand=np.zeros((4,13))
-        # self.publichand1=np.zeros((4,13))
-        # self.publichand2=np.zeros((4,13))
-        # self.publichand3=np.zeros((4,13))
-        # self.action_record0=np.zeros((4,9,13))
-        # self.action_record1=np.zeros((4,9,13))
-        # self.action_record2=np.zeros((4,9,13))
-        # self.action_record3=np.zeros((4,9,13))
-        # self.envhands=np.zeros((4,13,6))
-
     # Fold Check Call All_in Raise_50% Raise_75% Raise_100% Raise_125% Raise_150%
     # 0    1     2    3      4         5         6          7          8
     @override

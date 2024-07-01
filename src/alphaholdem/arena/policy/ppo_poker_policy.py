@@ -2,20 +2,20 @@ from __future__ import annotations
 
 import os
 import torch
+import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
 from typing_extensions import override
 from .policy import Policy
-from ...model.hunl_conv_model import HUNLConvModel
 from ...poker.component.observation import Observation
 
 class PPOPokerPolicy(Policy):
-    def __init__(self, model_path: str = None, model: HUNLConvModel = None, device: str = 'cuda') -> None:
+    def __init__(self, model_path: str = None, model: nn.Module = None, device: str = 'cuda') -> None:
         if model is not None:
             self.model = model
         else:
             self.model_path = model_path
-            self.model: HUNLConvModel = torch.load(model_path)
+            self.model = torch.load(model_path)
         self.model.to(device)
         self.model.eval()
 

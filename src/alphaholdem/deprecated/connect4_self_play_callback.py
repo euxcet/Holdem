@@ -3,10 +3,10 @@ import numpy as np
 from ray.rllib.algorithms.callbacks import DefaultCallbacks
 from ray.rllib.algorithms import Algorithm
 from ray.rllib.evaluation.episode_v2 import EpisodeV2
-from ..utils.logger import log
+from ...utils.logger import log
 from rich import print_json
 from ray.rllib.policy.policy import PolicySpec
-from ..policy.connect4.policy import RandomHeuristic, AlwaysSameHeuristic, SmartHeuristic, BeatLastHeuristic, LinearHeuristic
+from ...policy.connect4.policy import RandomHeuristic, AlwaysSameHeuristic, SmartHeuristic, BeatLastHeuristic, LinearHeuristic
 
 def create_connect4_self_play_callback(win_rate_threshold: float, opponent_policies: list[str], opponent_count: int = 10):
     class SelfPlayCallback(DefaultCallbacks):

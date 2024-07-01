@@ -3,12 +3,11 @@ from .envs.no_limit_texas_holdem_env import create_no_limit_holdem_env
 from ..poker.no_limit_texas_holdem_env import NoLimitTexasHoldemEnv
 from .policy.ppo_poker_policy import PPOPokerPolicy
 from .policy.tf_texas_policy import TFTexasPolicy
-import time
 
 # TODO: refactor
 class TexasArena():
-    def __init__(self) -> None:
-        self.tf = TFTexasPolicy(model_path='/home/clouduser/zcc/AlphaHoldem/torch/checkpoint/38000_model/model.ckpt')
+    def __init__(self, tf_checkpoint: str = './checkpoint/38000_model/model.ckpt') -> None:
+        self.tf = TFTexasPolicy(model_path=tf_checkpoint)
 
     def ppo_vs_tf(
         self,
