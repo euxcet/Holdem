@@ -34,16 +34,3 @@ distribution = true
 
 [tool.pdm.scripts]
 train = {call = "alphaholdem.train:main"}
-aof = {call = "alphaholdem.train_aof:main"}
-c4 = {call = "alphaholdem.train_connect4:main"}
-hunl = {call = "alphaholdem.train_hunl:main"}
-leduc = {call = "alphaholdem.train_leduc:main"}
-game = {call = "alphaholdem.game:main"}
-game_aof = {call = "alphaholdem.game:aof"}
-game_hunl = {call = "alphaholdem.game:hunl"}
-game_st = {call = "alphaholdem.game:speed_test"}
-eval_aof = {call = "alphaholdem.evaluate_aof:main"}
-eval_c4 = {call = "alphaholdem.evaluate_connect4:main"}
-eval_hunl = {call = "alphaholdem.evaluate_hunl:main"}
-
-eval_tf = {call = "alphaholdem.tensorflow.evaluate:main"}

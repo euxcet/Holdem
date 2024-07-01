@@ -1,28 +1,19 @@
 import argparse
 import random
 import ray
-from ray import air, train, tune
+from ray import air, tune
 from ray.rllib.algorithms.ppo import PPOConfig
 from ray.rllib.env.wrappers.pettingzoo_env import PettingZooEnv
 from ray.rllib.models import ModelCatalog
 from ray.rllib.policy.policy import PolicySpec
 from ray.rllib.evaluation.episode_v2 import EpisodeV2
-from ray.tune import CLIReporter, register_env
-from ray.air.integrations.wandb import WandbLoggerCallback, setup_wandb
-from pettingzoo.utils import wrappers
+from ray.tune import register_env
+from ray.air.integrations.wandb import WandbLoggerCallback
 
-from .poker.component.card import Card
-from .poker.component.street import Street
 from .model.hunl_conv_model import create_hunl_conv_model
 from .callback import get_callback
-from .callback.hunl_self_play_callback import create_hunl_self_play_callback
 from .policy import get_policies
-from .policy.random_heuristic import RandomHeuristic
-from .poker.poker_game_env import PokerGameEnv
-from .poker.no_limit_leduc_holdem_env import NoLimitLeducHoldemEnv
 from .poker import get_poker_env
-from .utils.logger import log
-from .arena.policy.tf_texas_policy import TFTexasPolicy
 from .config.config import load_train_config
 
 def main():
@@ -68,7 +59,7 @@ def main():
             policies_to_train=[learned_policy],
         )
         .callbacks(get_callback(cfg))
-        .evaluation(evaluation_interval=1)
+        .evaluation(evaluation_interval=cfg.rllib.evaluation_interval)
         .training(
             _enable_learner_api=False,
             lr=cfg.hyper.learning_rate,
