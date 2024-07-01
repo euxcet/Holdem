@@ -1,0 +1,31 @@
+[project]
+name = "alphaholdem-solver"
+version = "0.1.0"
+description = "Default template for PDM package"
+authors = [
+    {name = "Euxcet", email = "zcc.qwer@gmail.com"},
+]
+dependencies = [
+    "torch>=2.2.2",
+    "ray[rllib]==2.7.0",
+    "setuptools>=69.5.0",
+    "pettingzoo[butterfly,classic]==1.24.0",
+    "fastapi>=0.110.3",
+    "uvicorn>=0.29.0",
+]
+requires-python = ">=3.11, <3.12"
+readme = "README.md"
+license = {text = "MIT"}
+
+
+[tool.pdm]
+distribution = true
+
+[tool.pdm.scripts]
+web = {call = "alphaholdem_solver.main:main"}
+export = {call = "alphaholdem_solver.main:export"}
+
+[tool.pdm.dev-dependencies]
+dev = [
+    "-e file:///${PROJECT_ROOT}/../torch#egg=AlphaHoldem",
+]

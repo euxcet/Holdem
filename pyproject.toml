@@ -1,0 +1,49 @@
+[project]
+name = "AlphaHoldem"
+version = "0.1.0"
+description = "Default template for PDM package"
+authors = [
+    {name = "Euxcet", email = "zcc.qwer@gmail.com"},
+]
+dependencies = [
+    "torch>=2.2.2",
+    "ray[rllib]==2.7.0",
+    "setuptools>=69.5.0",
+    "pettingzoo[butterfly,classic]==1.24.0",
+    "SuperSuit==3.9.0",
+    "wandb>=0.16.6",
+    "sb3-contrib>=2.3.0",
+    "stable-baselines3>=2.3.1",
+    "onnx>=1.16.0",
+    "onnxruntime>=1.17.3",
+    "pytest>=8.2.0",
+    "tensorflow>=2.15.1",
+    "omegaconf>=2.3.0",
+]
+requires-python = ">=3.11, <3.12"
+readme = "README.md"
+license = {text = "MIT"}
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+
+[tool.pdm]
+distribution = true
+
+[tool.pdm.scripts]
+train = {call = "alphaholdem.train:main"}
+aof = {call = "alphaholdem.train_aof:main"}
+c4 = {call = "alphaholdem.train_connect4:main"}
+hunl = {call = "alphaholdem.train_hunl:main"}
+leduc = {call = "alphaholdem.train_leduc:main"}
+game = {call = "alphaholdem.game:main"}
+game_aof = {call = "alphaholdem.game:aof"}
+game_hunl = {call = "alphaholdem.game:hunl"}
+game_st = {call = "alphaholdem.game:speed_test"}
+eval_aof = {call = "alphaholdem.evaluate_aof:main"}
+eval_c4 = {call = "alphaholdem.evaluate_connect4:main"}
+eval_hunl = {call = "alphaholdem.evaluate_hunl:main"}
+
+eval_tf = {call = "alphaholdem.tensorflow.evaluate:main"}
