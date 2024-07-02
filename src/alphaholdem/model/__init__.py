@@ -1,0 +1,10 @@
+from ..config.train_config import TrainConfig
+from .hunl_conv_model import create_hunl_conv_model
+from .range_hunl_conv_model import create_range_hunl_conv_model
+
+def get_model(cfg: TrainConfig):
+    if cfg.hyper.model == 'hunl_conv':
+        return create_hunl_conv_model(cfg.game.num_action)
+    elif cfg.hyper.model == 'range_hunl_conv':
+        return create_range_hunl_conv_model(cfg.game.num_action)
+    raise Exception

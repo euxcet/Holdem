@@ -2,8 +2,8 @@ import torch
 from torch import nn
 from ray.rllib.models.torch.torch_modelv2 import TorchModelV2
 
-def create_hunl_conv_model(num_action: int):
-    class HUNLConvModel(TorchModelV2, nn.Module):
+def create_range_hunl_conv_model(num_action: int):
+    class RangeHUNLConvModel(TorchModelV2, nn.Module):
         def __init__(self, obs_space, act_space, num_outputs, *args, **kwargs):
             TorchModelV2.__init__(self, obs_space, act_space, num_outputs, *args, **kwargs)
             nn.Module.__init__(self)
@@ -50,9 +50,8 @@ def create_hunl_conv_model(num_action: int):
             out = torch.cat((card_out, action_out, input_dict['obs']['action_mask']), dim=1)
             policy = self.policy_fn(out)
             self._value_out = self.value_fn(out)
-            inf_mask = torch.clamp(torch.log(input_dict['obs']['action_mask']), -1e10, 1e10)
-            return policy + inf_mask, state
+            return policy, state
 
         def value_function(self):
             return self._value_out.flatten()
-    return HUNLConvModel
+    return RangeHUNLConvModel

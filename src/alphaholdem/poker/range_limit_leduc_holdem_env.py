@@ -2,15 +2,15 @@ import numpy as np
 from gymnasium import spaces
 
 from .component.street import Street
-from .limit_leduc_holdem import LimitLeducHoldem
-from .poker_game_env import PokerGameEnv
+from .range_limit_leduc_holdem import RangeLimitLeducHoldem
+from .range_poker_game_env import RangePokerGameEnv
 from .component.action import Action, ActionType
 from .component.card import Card
 
 # [4 * 13]
 # [num_agents * 1]
 
-class LimitLeducHoldemEnv(PokerGameEnv):
+class RangeLimitLeducHoldemEnv(RangePokerGameEnv):
     metadata = {
         "render_modes": ["human", "rgb_array"],
         "name": "AoF",
@@ -28,7 +28,7 @@ class LimitLeducHoldemEnv(PokerGameEnv):
         circular_train: bool = False,
         payoff_max: float = 200,
     ) -> None:
-        game = LimitLeducHoldem(
+        game = RangeLimitLeducHoldem(
             num_players=num_players,
             initial_chips=[initial_chips] * num_players,
             num_runs=num_runs,
@@ -58,9 +58,13 @@ class LimitLeducHoldemEnv(PokerGameEnv):
             }) for _ in range(self.num_agents)
         ])
         # Fold Check Call All_in Raise
-        self.action_spaces = self._to_dict([spaces.Discrete(self.game.action_shape) for _ in range(self.num_agents)])
+        self.action_spaces = self._to_dict([
+            spaces.Box(low=0, high=1, shape=(self.game.action_shape,), dtype=np.float32)
+             for _ in range(self.num_agents)
+        ])
 
     def step(self, action: int) -> None:
+        print('!! action', action)
         if action is None:
             super().step(None)
         else:

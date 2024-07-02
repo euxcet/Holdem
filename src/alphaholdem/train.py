@@ -10,7 +10,7 @@ from ray.rllib.evaluation.episode_v2 import EpisodeV2
 from ray.tune import register_env
 from ray.air.integrations.wandb import WandbLoggerCallback
 
-from .model.hunl_conv_model import create_hunl_conv_model
+from .model import get_model
 from .callback import get_callback
 from .policy import get_policies
 from .poker import get_poker_env
@@ -27,7 +27,7 @@ def main():
 
     register_env(env_name, lambda _: PettingZooEnv(env=get_poker_env(cfg.game)))
 
-    ModelCatalog.register_custom_model("Model", create_hunl_conv_model(cfg.game.num_action))
+    ModelCatalog.register_custom_model("Model", get_model(cfg))
 
     learned_policy = 'learned'
     initial_policies = get_policies(cfg.self_play.opponent_policies)

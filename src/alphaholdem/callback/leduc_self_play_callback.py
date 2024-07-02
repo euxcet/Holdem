@@ -21,7 +21,7 @@ def create_leduc_self_play_callback(
         def __init__(self):
             super().__init__()
             self.num_opponent_limit = num_opponent_limit
-            self.opponent_policies = opponent_policies
+            self.opponent_policies = Window(num_opponent_limit, opponent_policies)
             self.current_opponent_id = 0
             self.policy_to_remove = None
             self.win_rate_window = Window[float](win_rate_window_size)
@@ -32,12 +32,12 @@ def create_leduc_self_play_callback(
 
         def select_policy(self, agent_id: str, episode: EpisodeV2, **kwargs):
             return ("learned" if episode.episode_id % 2 == int(agent_id.split('_')[-1])
-                else np.random.choice(list(self.opponent_policies)))
+                else np.random.choice(self.opponent_policies.window))
 
         def add_policy(self, algorithm: Algorithm):
             policy_id = 'opponent_' + str(self.current_opponent_id % self.num_opponent_limit)
             if self.current_opponent_id < self.num_opponent_limit:
-                self.opponent_policies.append(policy_id)
+                self.opponent_policies.push(policy_id)
                 algorithm.add_policy(
                     policy_id=policy_id,
                     policy_cls=type(algorithm.get_policy('learned')),
@@ -70,10 +70,11 @@ def create_leduc_self_play_callback(
             self.calc_metric(algorithm, result)
             self.log_metric(algorithm, result)
             if self.update_counter.count():
-                metric = self.calc_metric_for_update(algorithm, result)
-                if metric > self.best_metric:
-                    self.add_policy(algorithm)
-                    self.best_win_rate_vs_tf = metric
+                # metric = self.calc_metric_for_update(algorithm, result)
+                self.add_policy(algorithm)
+                # if metric > self.best_metric:
+                #     self.add_policy(algorithm)
+                #     self.best_metric = metric
             result["learned_version"] = self.current_opponent_id
 
     return SelfPlayCallback

@@ -61,6 +61,7 @@ class TrainConfig():
     class TrainHyperConfig():
         def __init__(
             self,
+            model: str,
             learning_rate: float,
             clip_param: float,
             entropy_coeff: float,
@@ -79,6 +80,7 @@ class TrainConfig():
             stop_timesteps_total: int,
             stop_training_iteration: int,
         ) -> None:
+            self.model = model
             self.learning_rate = learning_rate
             self.clip_param = clip_param
             self.entropy_coeff = entropy_coeff
@@ -100,6 +102,7 @@ class TrainConfig():
         @staticmethod
         def load_from_dict(data: dict) -> TrainConfig.TrainHyperConfig:
             return TrainConfig.TrainHyperConfig(
+                model=data['model'],
                 learning_rate=data['learning_rate'],
                 clip_param=data['clip_param'],
                 entropy_coeff=data['entropy_coeff'],

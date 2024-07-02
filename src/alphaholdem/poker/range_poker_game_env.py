@@ -7,13 +7,13 @@ from pettingzoo import AECEnv
 
 from .component.action import Action
 from .component.observation import Observation
-from .poker_game import PokerGame
+from .range_poker_game import RangePokerGame
 
-class PokerGameEnv(AECEnv):
+class RangePokerGameEnv(AECEnv):
     def __init__(
         self,
         num_players: int,
-        game: PokerGame,
+        game: RangePokerGame,
         circular_train: bool = False,
         payoff_max: float = 200,
     ) -> None:
@@ -55,7 +55,7 @@ class PokerGameEnv(AECEnv):
     def _to_dict(self, l: list) -> dict:
         return { x: y for x, y in zip(self.agents, l)}
     
-    def step(self, action: Action) -> PokerGameEnv:
+    def step(self, action: Action) -> RangePokerGameEnv:
         if self.terminations[self.agent_selection] or self.truncations[self.agent_selection]:
             return self._was_dead_step(action)
         observation = self.game.step(action)
@@ -96,7 +96,7 @@ class PokerGameEnv(AECEnv):
         self,
         seed: int | None = None,
         options: dict | None = None,
-    ) -> PokerGameEnv:
+    ) -> RangePokerGameEnv:
         self.step_count = 0
         self.circular_offset = 0
         self.agents = [self._agent_id_to_name(i) for i in range(self.num_players)]
