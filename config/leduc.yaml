@@ -18,7 +18,7 @@ rllib:
   num_rollout_workers: 16
   num_envs_per_worker: 4
   num_cpus_per_worker: 0.125
-  num_gpus_per_worker: 0.035
+  num_gpus_per_worker: 0.1
   num_gpus_algorithm: 0.5
   num_learner_workers: 0
   framework: torch
@@ -49,8 +49,8 @@ hyper:
 self_play:
   type: leduc
   opponent_policies: [random]
-  num_opponent_limit: 3
-  num_update_iter: 6
+  num_opponent_limit: 40
+  num_update_iter: 20
   win_rate_window_size: 6
   arena_runs: 2048
 

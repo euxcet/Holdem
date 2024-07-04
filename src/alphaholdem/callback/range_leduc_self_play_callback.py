@@ -8,7 +8,7 @@ from ..utils.logger import log
 from ..utils.window import Window
 from ..utils.counter import Counter
 
-def create_leduc_self_play_callback(
+def create_range_leduc_self_play_callback(
     cfr_strategy_checkpoint: str,
     opponent_policies: list[str],
     num_opponent_limit: int = 10,
@@ -27,7 +27,7 @@ def create_leduc_self_play_callback(
             self.win_rate_window = Window[float](win_rate_window_size)
             self.update_counter = Counter(num_update_iter)
             self.best_metric = -10000
-            self.arena = LeducArena(cfr_strategy_checkpoint)
+            # self.arena = LeducArena(cfr_strategy_checkpoint)
             self.arena_runs = arena_runs
 
         def select_policy(self, agent_id: str, episode: EpisodeV2, **kwargs):
@@ -55,12 +55,12 @@ def create_leduc_self_play_callback(
             self.win_rate_window.push(win_rate)
             result["win_rate"] = win_rate
             result["win_rate_smooth"] = self.win_rate_window.average()
-            mean, var = self.arena.ppo_vs_cfr(
-                ppo=PPOLeducPolicy(model=algorithm.get_policy('learned').model),
-                runs=self.arena_runs,
-            )
-            result['win_rate_vs_cfr'] = mean
-            result['win_rate_vs_cfr_var'] = var
+            # mean, var = self.arena.ppo_vs_cfr(
+            #     ppo=PPOLeducPolicy(model=algorithm.get_policy('learned').model),
+            #     runs=self.arena_runs,
+            # )
+            # result['win_rate_vs_cfr'] = mean
+            # result['win_rate_vs_cfr_var'] = var
 
         def calc_metric_for_update(self, algorithm: Algorithm, result: dict):
             return result['win_rate_vs_cfr']
@@ -71,10 +71,11 @@ def create_leduc_self_play_callback(
         def on_train_result(self, *, algorithm: Algorithm, result: dict, **kwargs):
             self.calc_metric(algorithm, result)
             self.log_metric(algorithm, result)
-            # if self.opponent_policies.capacity() == 0:
-            #     self.add_policy(algorithm)
-            if self.update_counter.count():
+            if self.opponent_policies.capacity() == 0:
                 self.add_policy(algorithm)
+
+            # if self.update_counter.count():
+            #     self.add_policy(algorithm)
             result["learned_version"] = self.current_opponent_id
 
     return SelfPlayCallback

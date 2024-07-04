@@ -1,5 +1,5 @@
 game:
-  type: range_leduc
+  type: leduc
   num_players: 2
   showdown_street: showdown
   legal_raise_pot_size: []
@@ -15,12 +15,10 @@ resources:
   num_gpus: 4
 
 rllib:
-  num_rollout_workers: 1
-  # num_rollout_workers: 16
-  num_envs_per_worker: 1
-  # num_envs_per_worker: 4
+  num_rollout_workers: 16
+  num_envs_per_worker: 4
   num_cpus_per_worker: 0.125
-  num_gpus_per_worker: 0.035
+  num_gpus_per_worker: 0.1
   num_gpus_algorithm: 0.5
   num_learner_workers: 0
   framework: torch
@@ -29,7 +27,7 @@ rllib:
   verbose: 2
 
 hyper:
-  model: range_hunl_conv
+  model: hunl_conv
   learning_rate: 0.00005
   clip_param: 0.2
   entropy_coeff: 0.01
@@ -49,10 +47,10 @@ hyper:
   stop_training_iteration: 400000
 
 self_play:
-  type: range_leduc
-  opponent_policies: []
-  num_opponent_limit: 3
-  num_update_iter: 5
+  type: leduc
+  opponent_policies: [random]
+  num_opponent_limit: 1
+  num_update_iter: 20
   win_rate_window_size: 6
   arena_runs: 2048
 

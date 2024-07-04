@@ -59,16 +59,27 @@ class RangeLimitLeducHoldemEnv(RangePokerGameEnv):
         ])
         # Fold Check Call All_in Raise
         self.action_spaces = self._to_dict([
-            spaces.Box(low=0, high=1, shape=(self.game.action_shape,), dtype=np.float32)
+            # spaces.Box(low=-10, high=10, shape=(3 * self.game.action_shape,), dtype=np.float32)
+            spaces.Box(low=0.001, high=1, shape=(self.game.action_shape,), dtype=np.float32)
+            # spaces.Box(low=-10, high=10, shape=(self.game.action_shape,), dtype=np.float32)
+            # spaces.Discrete(self.game.action_shape)
              for _ in range(self.num_agents)
         ])
 
-    def step(self, action: int) -> None:
-        print('!! action', action)
+    def step(self, action: list[float]) -> None:
+        # print('action', action.shape, action)
         if action is None:
             super().step(None)
         else:
-            super().step(self.last_observation.legal_actions[action])
+            # hole = self.last_observation.hole_cards[0].rank - 9
+
+            hole = 0
+            prob = np.array(action[hole * self.game.action_shape : (hole + 1) * self.game.action_shape])
+            # prob = np.exp(prob) / np.sum(np.exp(prob), axis=0, keepdims=True)
+            prob = prob / np.sum(prob)
+            sample = np.random.choice(self.game.action_shape, p=prob)
+            super().step(self.last_observation.legal_actions[sample])
+            # super().step(self.last_observation.legal_actions[action])
 
     def observe_current(self) -> dict:
         return self.observe(self.agent_selection)

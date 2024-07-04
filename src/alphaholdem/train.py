@@ -7,6 +7,7 @@ from ray.rllib.env.wrappers.pettingzoo_env import PettingZooEnv
 from ray.rllib.models import ModelCatalog
 from ray.rllib.policy.policy import PolicySpec
 from ray.rllib.evaluation.episode_v2 import EpisodeV2
+from ray.rllib.models.torch.torch_action_dist import TorchDeterministic
 from ray.tune import register_env
 from ray.air.integrations.wandb import WandbLoggerCallback
 
@@ -28,12 +29,15 @@ def main():
     register_env(env_name, lambda _: PettingZooEnv(env=get_poker_env(cfg.game)))
 
     ModelCatalog.register_custom_model("Model", get_model(cfg))
+    # ModelCatalog.register_custom_action_dist("ActionDist", TorchDeterministic)
 
     learned_policy = 'learned'
     initial_policies = get_policies(cfg.self_play.opponent_policies)
     initial_policies.update({learned_policy: PolicySpec()})
 
     def select_policy(agent_id: str, episode: EpisodeV2, **kwargs):
+        if len(cfg.self_play.opponent_policies) == 0:
+            return learned_policy
         return (learned_policy if episode.episode_id % 2 == int(agent_id[-1:])
                 else random.choice(cfg.self_play.opponent_policies))
 
@@ -72,7 +76,10 @@ def main():
             vf_loss_coeff=cfg.hyper.vf_loss_coeff,
             vf_clip_param=cfg.hyper.vf_clip_param,
             clip_param=cfg.hyper.clip_param,
-            model={"custom_model": "Model",},
+            model={
+                "custom_model": "Model",
+                # "custom_action_dist": "ActionDist",
+            },
         )
     )
 

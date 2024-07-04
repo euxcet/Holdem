@@ -30,6 +30,8 @@ def create_hunl_self_play_callback(
             self.arena_runs = arena_runs
 
         def select_policy(self, agent_id: str, episode: EpisodeV2, **kwargs):
+            if self.opponent_policies.capacity() == 0:
+                return "learned"
             return ("learned" if episode.episode_id % 2 == int(agent_id.split('_')[-1])
                 else np.random.choice(self.opponent_policies.window))
 
