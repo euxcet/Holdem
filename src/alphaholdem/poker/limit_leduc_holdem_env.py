@@ -12,10 +12,8 @@ from .component.card import Card
 
 class LimitLeducHoldemEnv(PokerGameEnv):
     metadata = {
-        "render_modes": ["human", "rgb_array"],
-        "name": "AoF",
+        "name": "Leduc",
         "is_parallelizable": True,
-        "render_fps": 1,
     }
 
     def __init__(
@@ -50,7 +48,7 @@ class LimitLeducHoldemEnv(PokerGameEnv):
                 ),
                 # 4(preflop, flop, turn, river) * num_players * max_num_actions_street, 5(fold, check, call, raise, all_in)
                 'action_history': spaces.Box( 
-                    low=0.0, high=5.0, shape=(4, num_players * self.max_num_actions_street, 5), dtype=np.float32
+                    low=0.0, high=5.0, shape=(4, num_players * self.max_num_actions_street, self.game.action_shape), dtype=np.float32
                 ),
                 'action_mask': spaces.Box(
                     low=0, high=1, shape=(self.game.action_shape,), dtype=np.int8

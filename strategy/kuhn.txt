@@ -1,0 +1,12 @@
+J:
+Q:
+K:
+J:c 
+Q:c
+K:c
+J:r
+Q:r
+K:r
+J:cr
+Q:cr
+K:cr

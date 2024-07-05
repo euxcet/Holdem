@@ -4,7 +4,6 @@ import time
 import torch
 import torch.nn.functional as F
 import numpy as np
-from alphaholdem.model.hunl_conv_model import HUNLConvModel
 from alphaholdem.poker.no_limit_leduc_holdem_env import NoLimitLeducHoldemEnv
 from alphaholdem.poker.limit_leduc_holdem_env import LimitLeducHoldemEnv
 from alphaholdem.poker.component.card import Card

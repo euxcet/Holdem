@@ -42,6 +42,7 @@ class PokerGame():
         legal_raise_pot_size: list[float] = [0.5, 0.75, 1, 1.5, 2],
         showdown_street: Street = Street.Showdown,
         num_street_board_cards: list[int] = [3, 1, 1],
+        action_shape: int = None,
     ) -> None:
         self.verbose = verbose
         self.num_players = num_players
@@ -62,9 +63,9 @@ class PokerGame():
         self.custom_player_hole_cards = custom_player_hole_cards
         self.raise_pot_size = raise_pot_size
         self.legal_raise_pot_size = legal_raise_pot_size
-        self.action_shape = 4 + len(self.raise_pot_size)
         self.num_street_board_cards = num_street_board_cards
         self.num_board_cards = sum(self.num_street_board_cards)
+        self.action_shape = 4 + len(self.raise_pot_size) if action_shape is None else action_shape
         if initial_chips is None:
             self.initial_chips = [self.DEFAULT_INITIAL_CHIPS] * num_players
         elif type(initial_chips) is int:
@@ -250,6 +251,8 @@ class PokerGame():
     def _is_fold_legal_msg(self) -> tuple[bool, str]:
         if not self.legal_action_type[ActionType.Fold.value]:
             return False, 'This game does not support players to fold.'
+        if self._is_check_legal():
+            return False, "When it's possible to check, folding won't be a good choice."
         return self.street_raise != 0, 'Fold without opponent raising.'
 
     def _is_check_legal(self) -> bool:

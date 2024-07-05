@@ -85,7 +85,8 @@ class Judger():
         hole_cards: list[Card],
         board_cards: list[Card],
     ) -> Hand:
-        if len(hole_cards) + len(board_cards) == 2:
+        # for kuhn and leduc
+        if len(hole_cards) + len(board_cards) <= 2:
             return Hand(hole_cards + board_cards)
 
         best_hand: Hand = None

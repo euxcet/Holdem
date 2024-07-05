@@ -2,6 +2,7 @@ from pettingzoo.utils import wrappers
 from ..config.train_config import TrainConfig
 from .poker_game_env import PokerGameEnv
 from .limit_leduc_holdem_env import LimitLeducHoldemEnv
+from .kuhn_poker_env import KuhnPokerEnv
 from .range_limit_leduc_holdem_env import RangeLimitLeducHoldemEnv
 from .no_limit_texas_holdem_env import NoLimitTexasHoldemEnv
 
@@ -37,6 +38,11 @@ def get_poker_env(cfg: TrainConfig.TrainGameConfig):
             initial_chips=cfg.initial_chips,
             showdown_street=cfg.showdown_street,
             custom_board_cards=cfg.custom_board_cards,
+            circular_train=cfg.circular_train,
+            payoff_max=cfg.payoff_max,
+        ))
+    elif cfg.type == 'kuhn':
+        return _wrap(KuhnPokerEnv(
             circular_train=cfg.circular_train,
             payoff_max=cfg.payoff_max,
         ))

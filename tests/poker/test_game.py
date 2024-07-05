@@ -1,6 +1,7 @@
 from rich import print
 from alphaholdem.poker.no_limit_texas_holdem import NoLimitTexasHoldem
 from alphaholdem.poker.no_limit_leduc_holdem import NoLimitLeducHoldem
+from alphaholdem.poker.kuhn_poker import KuhnPoker
 from alphaholdem.poker.limit_leduc_holdem import LimitLeducHoldem
 from alphaholdem.poker.component.observation import Observation
 from alphaholdem.poker.component.card import Card
@@ -67,3 +68,15 @@ class TestGame():
         game.step(obs.legal_actions[2])
         obs = game.observe_current()
         # print(obs)
+
+    def test_kuhn(self):
+        game = KuhnPoker()
+        game.reset()
+        obs = game.observe_current()
+        game.step(obs.legal_actions[1])
+        obs = game.observe_current()
+        game.step(obs.legal_actions[3])
+        obs = game.observe_current()
+        game.step(obs.legal_actions[2])
+        obs = game.observe_current()
+        print(obs)

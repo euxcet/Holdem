@@ -12,10 +12,8 @@ from .component.card import Card
 
 class NoLimitTexasHoldemEnv(PokerGameEnv):
     metadata = {
-        "render_modes": ["human", "rgb_array"],
-        "name": "AoF",
+        "name": "NoLimitTexas",
         "is_parallelizable": True,
-        "render_fps": 1,
     }
 
     def __init__(
