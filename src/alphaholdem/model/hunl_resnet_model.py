@@ -58,11 +58,11 @@ class BasicBlock(nn.Module):
         identity = x
 
         out = self.conv1(x)
-        out = self.bn1(out)
+        # out = self.bn1(out)
         out = self.relu(out)
 
         out = self.conv2(out)
-        out = self.bn2(out)
+        # out = self.bn2(out)
 
         if self.downsample is not None:
             identity = self.downsample(x)
@@ -145,7 +145,7 @@ class ResNet(nn.Module):
         if stride != 1 or self.inplanes != planes * block.expansion:
             downsample = nn.Sequential(
                 conv1x1(self.inplanes, planes * block.expansion, stride),
-                norm_layer(planes * block.expansion),
+                # norm_layer(planes * block.expansion),
             )
 
         layers = []
@@ -172,7 +172,7 @@ class ResNet(nn.Module):
     def _forward_impl(self, x: Tensor) -> Tensor:
         # See note [TorchScript super()]
         x = self.conv1(x)
-        x = self.bn1(x)
+        # x = self.bn1(x)
         x = self.relu(x)
         x = self.maxpool(x)
 

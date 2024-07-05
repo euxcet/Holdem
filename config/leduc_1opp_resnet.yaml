@@ -15,7 +15,7 @@ resources:
   num_gpus: 4
 
 rllib:
-  num_rollout_workers: 1
+  num_rollout_workers: 16
   num_envs_per_worker: 4
   num_cpus_per_worker: 0.125
   num_gpus_per_worker: 0.1

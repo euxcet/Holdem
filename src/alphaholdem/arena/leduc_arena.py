@@ -56,3 +56,21 @@ class LeducArena():
                     result.append(env.agent_payoff()[env_id % 2] * env.payoff_max * 50)
                     env.reset()
         return np.mean(result), np.std(result)
+
+    def ppo_vs_ppo(
+        self,
+        ppo0: PPOPokerPolicy,
+        ppo1: PPOPokerPolicy,
+        runs: int = 1024,
+        batch_size: int = 32,
+    ) -> tuple[float, float]:
+        # TODO
+        ...
+
+    def ppos_melee(
+        self,
+        ppos: list[PPOPokerPolicy],
+        runs: int = 1024,
+        batch_size: int = 32,
+    ) -> list[float]:
+        ...
