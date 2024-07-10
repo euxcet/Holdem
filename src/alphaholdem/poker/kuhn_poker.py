@@ -20,7 +20,7 @@ class KuhnPoker(PokerGame):
             num_players=num_players,
             agents=agents,
             initial_chips=4, # players only need 2 chips, the 4 chips are to avoid an all in.
-            initial_deck=Deck.deck_leduc(),
+            initial_deck=Deck.deck_kuhn(),
             blinds=None,
             antes=[1, 1],
             num_hole_cards=1,

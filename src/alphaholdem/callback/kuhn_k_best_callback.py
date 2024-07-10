@@ -8,7 +8,7 @@ from ..utils.logger import log
 from ..utils.window import Window
 from ..utils.counter import Counter
 
-def create_kuhn_self_play_callback(
+def create_kuhn_k_best_callback(
     cfr_strategy_checkpoint: str,
     opponent_policies: list[str],
     num_opponent_limit: int = 10,
@@ -45,9 +45,21 @@ def create_kuhn_self_play_callback(
                     policy_cls=type(algorithm.get_policy('learned')),
                     policy_mapping_fn=self.select_policy,
                 )
-            algorithm.get_policy(policy_id).set_state(algorithm.get_policy('learned').get_state())
-            algorithm.workers.sync_weights()
-            self.current_opponent_id += 1
+                self.current_opponent_id += 1
+            else:
+                policies = [PPOKuhnPolicy(model=algorithm.get_policy('learned').model)]
+                policy_names = ['learned']
+                for policy_name in self.opponent_policies.window:
+                    if policy_name.startswith('opponent'):
+                        policies.append(PPOKuhnPolicy(model=algorithm.get_policy(policy_name).model))
+                        policy_names.append(policy_name)
+                scores = self.arena.ppos_melee(policies, runs=2048)
+                print("scores", scores, policy_names)
+                remove_policy = min(range(len(scores)), key=scores.__getitem__)
+                print("remove", remove_policy, policy_names[remove_policy])
+                if remove_policy > 0:
+                    algorithm.get_policy(policy_names[remove_policy]).set_state(algorithm.get_policy('learned').get_state())
+                    algorithm.workers.sync_weights()
 
         def calc_metric(self, algorithm: Algorithm, result: dict):
             main_reward = result["hist_stats"].pop("policy_learned_reward")
@@ -70,7 +82,7 @@ def create_kuhn_self_play_callback(
 
         def get_strategy(self, algorithm: Algorithm):
             # 12 nodes
-            # fold check call raise
+            # Fold Check Call Raise
             policy = PPOKuhnPolicy(model=algorithm.get_policy('learned').model)
             result = policy.get_range_policy()
             for i in range(result.shape[0]):

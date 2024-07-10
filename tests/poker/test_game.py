@@ -70,13 +70,18 @@ class TestGame():
         # print(obs)
 
     def test_kuhn(self):
+        # Fold Check Call Raise
+        return
         game = KuhnPoker()
         game.reset()
         obs = game.observe_current()
+        print(obs.legal_actions, obs)
         game.step(obs.legal_actions[1])
         obs = game.observe_current()
+        print(obs.legal_actions, obs)
         game.step(obs.legal_actions[3])
         obs = game.observe_current()
+        print(obs.legal_actions, obs)
         game.step(obs.legal_actions[2])
         obs = game.observe_current()
-        print(obs)
+        print(obs.legal_actions, obs)

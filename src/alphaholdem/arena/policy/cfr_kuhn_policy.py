@@ -4,8 +4,13 @@ from .policy import Policy
 from ...poker.component.observation import Observation
 
 class CFRKuhnPolicy(Policy):
-    def __init__(self, strategy_path: str) -> None:
-        self.policy = self._load_from_file(strategy_path)
+    def __init__(self, strategy_path: str = None, policy: dict = None) -> None:
+        if policy is not None:
+            self.strategy_path = None
+            self.policy = policy
+        else:
+            self.strategy_path = strategy_path
+            self.policy = self._load_from_file(strategy_path)
 
     def _load_from_file(self, path: str) -> dict[str, list[float]]:
         result = dict()
@@ -19,23 +24,12 @@ class CFRKuhnPolicy(Policy):
     def _get_history(self, env_obs: dict) -> str:
         observation = env_obs['observation']
         action_history = env_obs['action_history']
-        history = ''.join(map(lambda x: 'J' if x[2] == 9 else ('Q' if x[2] == 10 else 'K'), np.argwhere(observation > 0.5))) + ':/'
-        actions:list[list[int]] = np.argwhere(action_history > 0.05).tolist()
-        actions.sort(key=lambda x: x[0] * 100 + (x[1] % 6) * 10 + x[1] // 6)
-        street_action = 0
-        for index, action in enumerate(actions):
-            if index > 0 and action[0] != actions[index - 1][0]:
-                history += '/'
-                street_action = 0
-            if action[2] == 3:
+        history = ('J' if observation[0] > 0.5 else ('Q' if observation[1] > 0.5 else 'K')) + ':'
+        for i in range(action_history.shape[0]):
+            if action_history[i][3] > 0.05:
                 history += 'r'
-                street_action += 1
-            else:
+            elif action_history[i].any():
                 history += 'c'
-                street_action += 1
-        if history[-1] == 'c' and street_action > 1:
-            history += '/'
-        history += ':'
         return history
 
     @override
@@ -43,18 +37,16 @@ class CFRKuhnPolicy(Policy):
         policy = self.get_policy(env_obs, game_obs)
         return np.random.choice(len(policy), p=policy)
 
-    # Fold Check Call NONE Raise NONE NONE NONE
-    # 0    1     2    3    4     5    6    7
+    # Fold Check Call Raise
+    # 0    1     2    3
     @override
     def get_policy(self, env_obs: dict, game_obs: Observation) -> list[float]:
         cfr_policy = self.policy[self._get_history(env_obs)]
         policy = [0.0] * 4
-        # raise
-        policy[3] = cfr_policy[0]
-        # check or call
-        policy[1 if env_obs['action_mask'][1] == 1 else 2] = cfr_policy[1]
-        # fold
-        policy[0] = cfr_policy[2]
+        # 0 check or fold
+        # 1 call or raise
+        policy[0 if env_obs['action_mask'][0] == 1 else 1] = cfr_policy[0]
+        policy[2 if env_obs['action_mask'][2] == 1 else 3] = cfr_policy[1]
         return policy
 
     @override

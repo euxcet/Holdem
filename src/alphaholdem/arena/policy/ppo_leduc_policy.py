@@ -8,7 +8,6 @@ from ...poker.component.card import Card
 from ...poker.component.observation import Observation
 
 class PPOLeducPolicy(PPOPokerPolicy):
-    # TODO: use model_action_8
     @override
     def get_range_policy(self, env_obs: dict, game_obs: Observation) -> np.ndarray:
         env_obs_list = []

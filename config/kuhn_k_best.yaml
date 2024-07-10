@@ -46,12 +46,12 @@ hyper:
   stop_training_iteration: 400000
 
 self_play:
-  type: kuhn
+  type: kuhn_k_best
   opponent_policies: [random]
-  num_opponent_limit: 1
+  num_opponent_limit: 6
   num_update_iter: 5
   win_rate_window_size: 6
-  arena_runs: 16384
+  arena_runs: 8192
 
 policy:
   alphaholdem: /home/clouduser/zcc/Holdem/checkpoint/38000_model/model.ckpt

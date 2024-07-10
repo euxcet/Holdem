@@ -74,7 +74,6 @@ class TrainConfig():
             vf_loss_coeff: float,
             checkpoint_frequency: int,
             checkpoint_num_to_keep: int,
-            opponent_count: int,
             num_update_iter: int,
             win_rate_threshold: int,
             stop_timesteps_total: int,
@@ -93,7 +92,6 @@ class TrainConfig():
             self.vf_loss_coeff = vf_loss_coeff
             self.checkpoint_frequency = checkpoint_frequency
             self.checkpoint_num_to_keep = checkpoint_num_to_keep
-            self.opponent_count = opponent_count
             self.num_update_iter = num_update_iter
             self.win_rate_threshold = win_rate_threshold
             self.stop_timesteps_total = stop_timesteps_total
@@ -115,7 +113,6 @@ class TrainConfig():
                 vf_loss_coeff=data['vf_loss_coeff'],
                 checkpoint_frequency=data['checkpoint_frequency'],
                 checkpoint_num_to_keep=data['checkpoint_num_to_keep'],
-                opponent_count=data['opponent_count'],
                 num_update_iter=data['num_update_iter'],
                 win_rate_threshold=data['win_rate_threshold'],
                 stop_timesteps_total=data['stop_timesteps_total'],
@@ -195,15 +192,18 @@ class TrainConfig():
             self,
             alphaholdem: str,
             leduc_cfr: str,
+            kuhn_cfr: str,
         ) -> None:
             self.alphaholdem = alphaholdem
             self.leduc_cfr = leduc_cfr
+            self.kuhn_cfr = kuhn_cfr
 
         @staticmethod
         def load_from_dict(data: dict) -> TrainConfig.TrainPolicyConfig:
             return TrainConfig.TrainPolicyConfig(
                 alphaholdem=data['alphaholdem'],
                 leduc_cfr=data['leduc_cfr'],
+                kuhn_cfr=data['kuhn_cfr'],
             )
     
     def __init__(

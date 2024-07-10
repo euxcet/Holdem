@@ -59,3 +59,4 @@ self_play:
 policy:
   alphaholdem: /home/clouduser/zcc/Holdem/checkpoint/38000_model/model.ckpt
   leduc_cfr: /home/clouduser/zcc/Holdem/strategy/leduc.txt
+  kuhn_cfr: /home/clouduser/zcc/Holdem/strategy/kuhn.txt
