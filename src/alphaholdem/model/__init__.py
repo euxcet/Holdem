@@ -3,6 +3,7 @@ from .hunl_conv_model import HUNLConvModel
 from .hunl_resnet_model import HUNLResnetModel
 from .range_hunl_conv_model import create_range_hunl_conv_model
 from .kuhn_model import KuhnModel
+from .range_kuhn_model import RangeKuhnModel
 
 def get_model(cfg: TrainConfig):
     if cfg.hyper.model == 'hunl_conv':
@@ -13,4 +14,6 @@ def get_model(cfg: TrainConfig):
         return HUNLResnetModel
     elif cfg.hyper.model == 'kuhn':
         return KuhnModel
+    elif cfg.hyper.model == 'range_kuhn':
+        return RangeKuhnModel
     raise Exception

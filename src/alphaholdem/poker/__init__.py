@@ -3,6 +3,7 @@ from ..config.train_config import TrainConfig
 from .poker_game_env import PokerGameEnv
 from .limit_leduc_holdem_env import LimitLeducHoldemEnv
 from .kuhn_poker_env import KuhnPokerEnv
+from .range_kuhn_poker_env import RangeKuhnPokerEnv
 from .range_limit_leduc_holdem_env import RangeLimitLeducHoldemEnv
 from .no_limit_texas_holdem_env import NoLimitTexasHoldemEnv
 
@@ -43,6 +44,11 @@ def get_poker_env(cfg: TrainConfig.TrainGameConfig):
         ))
     elif cfg.type == 'kuhn':
         return _wrap(KuhnPokerEnv(
+            circular_train=cfg.circular_train,
+            payoff_max=cfg.payoff_max,
+        ))
+    elif cfg.type == 'range_kuhn':
+        return _range_wrap(RangeKuhnPokerEnv(
             circular_train=cfg.circular_train,
             payoff_max=cfg.payoff_max,
         ))

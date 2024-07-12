@@ -12,16 +12,16 @@ class TestTexasPolicy():
     @pytest.mark.skipif(SKIP, reason="SKIP == True")
     def test_cfr(self):
         print(len(self.ppos))
-        mean, var = KuhnArena('/home/clouduser/zcc/Holdem/strategy/kuhn.txt').ppo_vs_cfr(
-            ppo=self.ppos[-1],
-            cfr=CFRKuhnPolicy('/home/clouduser/zcc/Holdem/strategy/kuhn_nash.txt'),
-            runs=16384,
-        )
-        print(mean, var)
+        # mean, var = KuhnArena('/home/clouduser/zcc/Holdem/strategy/kuhn.txt').ppo_vs_cfr(
+        #     ppo=self.ppos[-1],
+        #     cfr=CFRKuhnPolicy('/home/clouduser/zcc/Holdem/strategy/kuhn_nash.txt'),
+        #     runs=16384,
+        # )
+        # print(mean, var)
 
         mean, var = KuhnArena('/home/clouduser/zcc/Holdem/strategy/kuhn.txt').cfr_self_play(
-            cfr1=CFRKuhnPolicy('/home/clouduser/zcc/Holdem/strategy/kuhn.txt'),
-            cfr2=CFRKuhnPolicy('/home/clouduser/zcc/Holdem/strategy/kuhn_nash.txt'),
+            cfr1=CFRKuhnPolicy('/home/clouduser/zcc/Holdem/strategy/kuhn_nash.txt'),
+            cfr2=CFRKuhnPolicy('/home/clouduser/zcc/Holdem/strategy/new.txt'),
             runs=16384,
         )
         print(mean, var)

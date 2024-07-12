@@ -35,7 +35,7 @@ class PPOPokerPolicy(Policy):
         return self.get_policies([env_obs], [game_obs])[0]
 
     @override
-    def get_policies(self, env_obs_list: list[dict], game_obs_list: list[Observation]) -> list[list[float]]:
+    def get_policies(self, env_obs_list: list[dict], game_obs_list: list[Observation]) -> np.ndarray:
         observations = []
         action_historys = []
         action_masks = []
@@ -50,7 +50,6 @@ class PPOPokerPolicy(Policy):
                 'action_mask': torch.from_numpy(np.stack(action_masks)).to('cuda'),
             }
         }
-        # TODO: add dim
         return F.softmax(self.model(obs)[0]).detach().cpu().numpy()
 
     @staticmethod

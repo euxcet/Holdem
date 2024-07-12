@@ -42,6 +42,7 @@ class RangePokerGame():
         legal_raise_pot_size: list[float] = [0.5, 0.75, 1, 1.5, 2],
         showdown_street: Street = Street.Showdown,
         num_street_board_cards: list[int] = [3, 1, 1],
+        action_shape: int = None,
     ) -> None:
         self.verbose = verbose
         self.num_players = num_players
@@ -62,7 +63,7 @@ class RangePokerGame():
         self.custom_player_hole_cards = custom_player_hole_cards
         self.raise_pot_size = raise_pot_size
         self.legal_raise_pot_size = legal_raise_pot_size
-        self.action_shape = 4 + len(self.raise_pot_size)
+        self.action_shape = 4 + len(self.raise_pot_size) if action_shape is None else action_shape
         self.num_street_board_cards = num_street_board_cards
         self.num_board_cards = sum(self.num_street_board_cards)
         if initial_chips is None:

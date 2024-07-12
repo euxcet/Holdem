@@ -35,19 +35,19 @@ class CFRKuhnPolicy(Policy):
     @override
     def sample_action(self, env_obs: dict, game_obs: Observation) -> int:
         policy = self.get_policy(env_obs, game_obs)
-        return np.random.choice(len(policy), p=policy)
+        return np.random.choice(len(policy), p=policy / sum(policy))
 
     # Fold Check Call Raise
     # 0    1     2    3
     @override
-    def get_policy(self, env_obs: dict, game_obs: Observation) -> list[float]:
+    def get_policy(self, env_obs: dict, game_obs: Observation) -> np.ndarray:
         cfr_policy = self.policy[self._get_history(env_obs)]
-        policy = [0.0] * 4
+        policy = np.zeros(4)
         # 0 check or fold
         # 1 call or raise
         policy[0 if env_obs['action_mask'][0] == 1 else 1] = cfr_policy[0]
         policy[2 if env_obs['action_mask'][2] == 1 else 3] = cfr_policy[1]
-        return policy
+        return policy / sum(policy)
 
     @override
     def get_range_policy(self, env_obs: dict, game_obs: Observation) -> list[float]:
