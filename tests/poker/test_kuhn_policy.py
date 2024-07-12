@@ -1,6 +1,6 @@
 import pytest
 from alphaholdem.arena.kuhn_arena import KuhnArena
-from alphaholdem.arena.policy.cfr_kuhn_policy import CFRKuhnPolicy
+from alphaholdem.arena.policy.lookup_kuhn_policy import LookupKuhnPolicy
 from alphaholdem.arena.policy.ppo_kuhn_policy import PPOKuhnPolicy
 
 class TestTexasPolicy():
@@ -20,8 +20,8 @@ class TestTexasPolicy():
         # print(mean, var)
 
         mean, var = KuhnArena('/home/clouduser/zcc/Holdem/strategy/kuhn.txt').cfr_self_play(
-            cfr1=CFRKuhnPolicy('/home/clouduser/zcc/Holdem/strategy/kuhn_nash.txt'),
-            cfr2=CFRKuhnPolicy('/home/clouduser/zcc/Holdem/strategy/new.txt'),
+            cfr1=LookupKuhnPolicy('/home/clouduser/zcc/Holdem/strategy/kuhn_nash.txt'),
+            cfr2=LookupKuhnPolicy('/home/clouduser/zcc/Holdem/strategy/new.txt'),
             runs=16384,
         )
         print(mean, var)

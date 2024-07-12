@@ -47,7 +47,9 @@ hyper:
   stop_training_iteration: 400000
 
 self_play:
-  type: leduc
+  type: naive
+  arena: leduc
+  policy_type: leduc
   opponent_policies: [random]
   num_opponent_limit: 40
   num_update_iter: 20
@@ -56,5 +58,5 @@ self_play:
 
 policy:
   alphaholdem: /home/clouduser/zcc/Holdem/checkpoint/38000_model/model.ckpt
-  leduc_cfr: /home/clouduser/zcc/Holdem/strategy/leduc.txt
-  kuhn_cfr: /home/clouduser/zcc/Holdem/strategy/kuhn.txt
+  leduc_nash: /home/clouduser/zcc/Holdem/strategy/leduc.txt
+  kuhn_nash: /home/clouduser/zcc/Holdem/strategy/kuhn_nash.txt

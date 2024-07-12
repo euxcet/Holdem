@@ -163,6 +163,8 @@ class TrainConfig():
         def __init__(
             self,
             type: str,
+            arena: str,
+            policy_type: str,
             opponent_policies: list[str],
             num_opponent_limit: int,
             num_update_iter: int,
@@ -170,6 +172,8 @@ class TrainConfig():
             arena_runs: int,
         ) -> None:
             self.type = type
+            self.arena = arena
+            self.policy_type = policy_type
             self.opponent_policies = opponent_policies
             self.num_opponent_limit = num_opponent_limit
             self.num_update_iter = num_update_iter
@@ -180,6 +184,8 @@ class TrainConfig():
         def load_from_dict(data: dict) -> TrainConfig.TrainSelfPlayConfig:
             return TrainConfig.TrainSelfPlayConfig(
                 type=data['type'],
+                arena=data['arena'],
+                policy_type=data['policy_type'],
                 opponent_policies=data['opponent_policies'],
                 num_opponent_limit=data['num_opponent_limit'],
                 num_update_iter=data['num_update_iter'],
@@ -191,19 +197,19 @@ class TrainConfig():
         def __init__(
             self,
             alphaholdem: str,
-            leduc_cfr: str,
-            kuhn_cfr: str,
+            leduc_nash: str,
+            kuhn_nash: str,
         ) -> None:
             self.alphaholdem = alphaholdem
-            self.leduc_cfr = leduc_cfr
-            self.kuhn_cfr = kuhn_cfr
+            self.leduc_nash = leduc_nash
+            self.kuhn_nash = kuhn_nash
 
         @staticmethod
         def load_from_dict(data: dict) -> TrainConfig.TrainPolicyConfig:
             return TrainConfig.TrainPolicyConfig(
                 alphaholdem=data['alphaholdem'],
-                leduc_cfr=data['leduc_cfr'],
-                kuhn_cfr=data['kuhn_cfr'],
+                leduc_nash=data['leduc_nash'],
+                kuhn_nash=data['kuhn_nash'],
             )
     
     def __init__(

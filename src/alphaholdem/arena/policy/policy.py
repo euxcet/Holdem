@@ -1,3 +1,4 @@
+import numpy as np
 from abc import ABC, abstractmethod
 from ...poker.component.observation import Observation
 
@@ -14,7 +15,7 @@ class Policy(ABC):
 
     # TODO: use np.ndarray instead of list[float]?
     @abstractmethod
-    def get_policy(self, env_obs: dict, game_obs: Observation) -> list[float]:
+    def get_policy(self, env_obs: dict, game_obs: Observation) -> np.ndarray:
         ...
 
     def get_policies(self, env_obs_list: list[dict], game_obs_list: list[Observation]) -> list[list[float]]:
@@ -25,4 +26,7 @@ class Policy(ABC):
 
     @abstractmethod
     def get_range_policy(self, env_obs: dict, game_obs: Observation) -> list[float]:
+        ...
+
+    def log(self) -> None:
         ...

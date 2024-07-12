@@ -1,9 +1,13 @@
 from __future__ import annotations
 
+from typing_extensions import override
 import numpy as np
+
+from alphaholdem.arena.policy.policy import Policy
+from .arena import Arena
 from .policy.ppo_kuhn_policy import PPOKuhnPolicy
-from .policy.cfr_kuhn_policy import CFRKuhnPolicy
-from ..poker.kuhn_poker_env import KuhnPokerEnv
+from .policy.ppo_range_kuhn_policy import PPORangeKuhnPolicy
+from .policy.lookup_kuhn_policy import LookupKuhnPolicy
 
 class KuhnNode():
     def __init__(
@@ -54,7 +58,7 @@ class KuhnTree():
             player=2,
             son=son,
             action_history="",
-            action_prob=[1/6] * 6,
+            action_prob=[1 / 6] * 6,
             is_terminal=False,
             hole_cards="",
             payoff=[],
@@ -105,63 +109,38 @@ class KuhnTree():
             payoff=[],
         )
 
-class KuhnArena():
-    def __init__(self, strategy_path: str = 'strategy/kuhn.txt') -> None:
-        self.cfr = CFRKuhnPolicy(strategy_path)
+class KuhnArena(Arena):
+    def __init__(self, nash_path: str = 'strategy/kuhn.txt') -> None:
+        super().__init__()
+        self.nash = LookupKuhnPolicy(nash_path)
 
-    def cfr_self_play(
-        self,
-        cfr1: CFRKuhnPolicy = None,
-        cfr2: CFRKuhnPolicy = None,
-        runs: int = 1024,
-    ) -> tuple[float, float]:
-        cfr1 = self.cfr if cfr1 is None else cfr1
-        cfr2 = self.cfr if cfr2 is None else cfr2
-        return (KuhnTree([cfr1.policy, cfr2.policy]).dfs_ev() - KuhnTree([cfr2.policy, cfr1.policy]).dfs_ev()) / 2 * 100, 0
-
-    def _to_cfr_policy(self, strategy: np.ndarray) -> CFRKuhnPolicy:
+    def _to_lookup_policy(self, strategy: np.ndarray) -> LookupKuhnPolicy:
         # Fold Check Call Raise
         node_name = ['J:', 'Q:', 'K:', 'J:cr', 'Q:cr', 'K:cr', 'J:c', 'Q:c', 'K:c', 'J:r', 'Q:r', 'K:r']
         policy = { node_name[i]: strategy[i] for i in range(12) }
-        return CFRKuhnPolicy(policy = policy)
+        return LookupKuhnPolicy(policy = policy)
 
-    def ppo_vs_cfr(
+    @override
+    @property
+    def nash_policy(self) -> LookupKuhnPolicy:
+        return self.nash
+
+    @override
+    def validate_policy(self, policy: Policy) -> None:
+        assert type(policy) in [LookupKuhnPolicy, PPOKuhnPolicy, PPORangeKuhnPolicy]
+
+    @override
+    def policy_vs_policy(
         self,
-        ppo: PPOKuhnPolicy,
-        cfr: CFRKuhnPolicy = None,
-        runs: int = 1024,
-        batch_size: int = 32,
+        policy0: Policy,
+        policy1: Policy,
+        runs: int = 1024
     ) -> tuple[float, float]:
-        return self.cfr_self_play(
-            cfr1=self._to_cfr_policy(ppo.get_range_policy()),
-            cfr2=cfr,
-            runs=runs
-        )
-
-    def ppo_vs_ppo(
-        self,
-        ppo1: PPOKuhnPolicy,
-        ppo2: PPOKuhnPolicy,
-        runs: int = 1024,
-        batch_size: int = 32,
-    ) -> tuple[float, float]:
-        return self.cfr_self_play(
-            cfr1=self._to_cfr_policy(ppo1.get_range_policy()),
-            cfr2=self._to_cfr_policy(ppo2.get_range_policy()),
-            runs=runs
-        )
-
-    def ppos_melee(
-        self,
-        ppos: list[PPOKuhnPolicy],
-        runs: int = 1024,
-        batch_size: int = 32,
-    ) -> list[float]:
-        cfrs = [self._to_cfr_policy(ppo.get_range_policy()) for ppo in ppos]
-        scores = [0] * len(ppos)
-        for i in range(len(ppos)):
-            for j in range(i + 1, len(ppos)):
-                mean, var = self.cfr_self_play(cfr1=cfrs[i], cfr2=cfrs[j], runs=runs)
-                scores[i] += mean / (len(ppos) - 1)
-                scores[j] -= mean / (len(ppos) - 1)
-        return scores
+        self.validate_policy(policy0)
+        self.validate_policy(policy1)
+        if type(policy0) in [PPOKuhnPolicy, PPORangeKuhnPolicy]:
+            policy0 = self._to_lookup_policy(policy0.get_range_policy())
+        if type(policy1) in [PPOKuhnPolicy, PPORangeKuhnPolicy]:
+            policy1 = self._to_lookup_policy(policy1.get_range_policy())
+        return (KuhnTree([policy0.policy, policy1.policy]).dfs_ev()
+                - KuhnTree([policy1.policy, policy0.policy]).dfs_ev()) / 2 * 100, 0

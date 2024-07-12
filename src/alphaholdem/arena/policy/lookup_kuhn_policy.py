@@ -3,7 +3,7 @@ from typing_extensions import override
 from .policy import Policy
 from ...poker.component.observation import Observation
 
-class CFRKuhnPolicy(Policy):
+class LookupKuhnPolicy(Policy):
     def __init__(self, strategy_path: str = None, policy: dict = None) -> None:
         if policy is not None:
             self.strategy_path = None

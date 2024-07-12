@@ -61,6 +61,13 @@ class PPORangeKuhnPolicy(PPOPokerPolicy):
             strategy[i] = [result[i][0], 1.0 - result[i][0]]
         return strategy
 
+    def log(self):
+        result = self.get_range_policy()
+        for i in range(result.shape[0]):
+            for j in range(result[i].shape[0]):
+                print(round(result[i][j], 3), end = ' ')
+            print()
+
     @staticmethod
     def load_policy_from_run(run_folder: str) -> PPORangeKuhnPolicy:
         return PPORangeKuhnPolicy(model_path=PPOPokerPolicy._load_all_model_path(run_folder)[-1])

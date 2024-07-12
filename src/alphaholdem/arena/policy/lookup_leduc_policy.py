@@ -3,7 +3,7 @@ from typing_extensions import override
 from .policy import Policy
 from ...poker.component.observation import Observation
 
-class CFRLeducPolicy(Policy):
+class LookupLeducPolicy(Policy):
     def __init__(self, strategy_path: str) -> None:
         self.policy = self._load_from_file(strategy_path)
 

@@ -3,14 +3,14 @@ from alphaholdem.poker.limit_leduc_holdem_env import LimitLeducHoldemEnv
 from alphaholdem.poker.component.card import Card
 from alphaholdem.poker.component.street import Street
 from alphaholdem.arena.policy.ppo_leduc_policy import PPOLeducPolicy
-from alphaholdem.arena.policy.cfr_leduc_policy import CFRLeducPolicy
+from alphaholdem.arena.policy.lookup_leduc_policy import LookupLeducPolicy
 from alphaholdem.arena.leduc_arena import LeducArena
 
 class TestLeducPolicy():
     SKIP = True
     # run_folder = '/home/clouduser/ray_results/PPO_2024-05-18_15-09-37'
     # ppos = PPOLeducPolicy.load_policies_from_run(run_folder)
-    cfr = CFRLeducPolicy('strategy/leduc.txt')
+    cfr = LookupLeducPolicy('strategy/leduc.txt')
 
     # Fold Check Call All_in Raise_25% Raise_50% Raise_75% Raise_125%
     # 0    1     2    3      4         5         6         7

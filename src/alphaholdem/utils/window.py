@@ -6,9 +6,9 @@ from typing import TypeVar, Generic
 _T = TypeVar('_T')
 
 class Window(Generic[_T]):
-  def __init__(self, window_length: int, window: list[_T] = None):
+  def __init__(self, window_length: int, window: list[_T] = []):
     self.window_length = window_length
-    self.window:list[_T] = [] if window is None else window
+    self.window:list[_T] = window
     self.push_count = 0
   
   def push(self, data:_T):
