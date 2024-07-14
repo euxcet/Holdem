@@ -47,7 +47,11 @@ class PPORangeKuhnPolicy(PPOPokerPolicy):
         return self.model(obs)[0].detach().cpu().numpy()
 
     @override
-    def get_range_policy(self) -> np.ndarray:
+    def get_range_policy(self, env_obs: dict, game_obs: Observation) -> list[float]:
+        ...
+
+    @override
+    def get_all_policy(self) -> np.ndarray:
         observations = [
             ('J', ''), ('Q', ''), ('K', ''),
             ('J', 'cr'), ('Q', 'cr'), ('K', 'cr'), 

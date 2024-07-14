@@ -32,14 +32,14 @@ def main():
     # ModelCatalog.register_custom_action_dist("ActionDist", TorchDeterministic)
 
     learned_policy = 'learned'
-    initial_policies = get_policies(cfg.self_play.opponent_policies)
+    initial_policies = get_policies(cfg.self_play.rule_based_policies)
     initial_policies.update({learned_policy: PolicySpec()})
 
     def select_policy(agent_id: str, episode: EpisodeV2, **kwargs):
-        if len(cfg.self_play.opponent_policies) == 0:
+        if len(cfg.self_play.rule_based_policies) == 0:
             return learned_policy
         return (learned_policy if episode.episode_id % 2 == int(agent_id[-1:])
-                else random.choice(cfg.self_play.opponent_policies))
+                else random.choice(cfg.self_play.rule_based_policies))
 
     config = (
         PPOConfig()

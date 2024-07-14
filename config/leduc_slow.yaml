@@ -28,7 +28,7 @@ rllib:
 
 hyper:
   model: hunl_conv
-  learning_rate: 0.00005
+  learning_rate: 0.0000001
   clip_param: 0.2
   entropy_coeff: 0.01
   train_batch_size: 8192

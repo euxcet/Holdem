@@ -12,3 +12,7 @@ class PPOTexasPolicy(PPOPokerPolicy):
     @override
     def get_range_policy(self, env_obs: dict, game_obs: Observation) -> np.ndarray:
         ...
+
+    @override
+    def get_all_policy(self) -> np.ndarray:
+        ...

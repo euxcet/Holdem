@@ -4,7 +4,7 @@ from .policy import Policy
 from ...poker.component.observation import Observation
 
 class LookupKuhnPolicy(Policy):
-    def __init__(self, strategy_path: str = None, policy: dict = None) -> None:
+    def __init__(self, strategy_path: str | None = None, policy: dict | None = None) -> None:
         if policy is not None:
             self.strategy_path = None
             self.policy = policy
@@ -51,4 +51,8 @@ class LookupKuhnPolicy(Policy):
 
     @override
     def get_range_policy(self, env_obs: dict, game_obs: Observation) -> list[float]:
+        ...
+
+    @override
+    def get_all_policy(self) -> np.ndarray:
         ...

@@ -30,5 +30,5 @@ class NaiveSelfPlayCallback(SelfPlayCallback):
         if not self.opponent_policies.full():
             self.add_policy(algorithm)
         else:
-            self.replace_policy(algorithm, self.circular_pointer)
+            self.replace_policy(algorithm, self._get_policy_id(self.circular_pointer))
             self.circular_pointer = (self.circular_pointer + 1) % self.num_opponent_limit

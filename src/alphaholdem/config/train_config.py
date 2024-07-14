@@ -165,19 +165,17 @@ class TrainConfig():
             type: str,
             arena: str,
             policy_type: str,
-            opponent_policies: list[str],
+            rule_based_policies: list[str],
             num_opponent_limit: int,
             num_update_iter: int,
-            win_rate_window_size: int,
             arena_runs: int,
         ) -> None:
             self.type = type
             self.arena = arena
             self.policy_type = policy_type
-            self.opponent_policies = opponent_policies
+            self.rule_based_policies = rule_based_policies
             self.num_opponent_limit = num_opponent_limit
             self.num_update_iter = num_update_iter
-            self.win_rate_window_size = win_rate_window_size
             self.arena_runs = arena_runs
         
         @staticmethod
@@ -186,10 +184,9 @@ class TrainConfig():
                 type=data['type'],
                 arena=data['arena'],
                 policy_type=data['policy_type'],
-                opponent_policies=data['opponent_policies'],
+                rule_based_policies=data['rule_based_policies'],
                 num_opponent_limit=data['num_opponent_limit'],
                 num_update_iter=data['num_update_iter'],
-                win_rate_window_size=data['win_rate_window_size'],
                 arena_runs=data['arena_runs'],
             )
 

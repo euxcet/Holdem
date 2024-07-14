@@ -9,9 +9,19 @@ from alphaholdem.arena.leduc_arena import LeducArena
 class TestLeducPolicy():
     SKIP = True
     # run_folder = '/home/clouduser/ray_results/PPO_2024-05-18_15-09-37'
-    # ppos = PPOLeducPolicy.load_policies_from_run(run_folder)
     cfr = LookupLeducPolicy('strategy/leduc.txt')
 
+
+    # @pytest.mark.skipif(SKIP, reason="SKIP == True")
+    def test_tree(self):
+        ppos = PPOLeducPolicy.load_policies_from_run('/home/clouduser/ray_results/PPO_2024-07-13_15-04-54')
+        mean, var = LeducArena('/home/clouduser/zcc/Holdem/strategy/leduc.txt').policy_vs_policy(
+            policy0=LookupLeducPolicy('/home/clouduser/zcc/Holdem/strategy/leduc.txt'),
+            policy1=ppos[-1],
+            runs=16384,
+        )
+        print(mean, var)
+        
     # Fold Check Call All_in Raise_25% Raise_50% Raise_75% Raise_125%
     # 0    1     2    3      4         5         6         7
     @pytest.mark.skipif(SKIP, reason="SKIP == True")

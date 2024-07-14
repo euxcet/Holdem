@@ -28,12 +28,12 @@ def get_callback(cfg: TrainConfig):
         class WrapSelfPlayCallback(NaiveSelfPlayCallback):
             def __init__(self):
                 super().__init__(
-                    num_opponent_limit=cfg.self_play.opponent_policies,
+                    num_opponent_limit=cfg.self_play.num_opponent_limit,
                     num_update_iter=cfg.self_play.num_update_iter,
                     arena=arena,
                     arena_runs=cfg.self_play.arena_runs,
                     payoff_max=cfg.game.payoff_max,
-                    rule_based_policies=[],
+                    rule_based_policies=cfg.self_play.rule_based_policies,
                     policy_type=policy_type,
                 )
         return WrapSelfPlayCallback

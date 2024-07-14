@@ -36,7 +36,7 @@ class Deck():
 
     @staticmethod
     def deck_leduc() -> Deck:
-        return Deck(Card.from_str_list(['Js', 'Jh', 'Qs', 'Qh', 'Ks', 'Kh']))
+        return Deck(Card.from_str_list(['Jc', 'Jc', 'Qc', 'Qc', 'Kc', 'Kc']))
 
     @staticmethod
     def deck_kuhn() -> Deck:

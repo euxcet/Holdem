@@ -28,5 +28,9 @@ class Policy(ABC):
     def get_range_policy(self, env_obs: dict, game_obs: Observation) -> list[float]:
         ...
 
+    @abstractmethod
+    def get_all_policy(self) -> np.ndarray:
+        ...
+
     def log(self) -> None:
         ...

@@ -47,12 +47,12 @@ hyper:
   stop_training_iteration: 400000
 
 self_play:
-  type: hunl
-  opponent_policies: [random]
-  num_opponent_limit: 10
-  num_update_iter: 3
-  win_rate_window_size: 6
-  arena_runs: 8192
+  type: naive
+  arena: texas
+  rule_based_policies: []
+  num_opponent_limit: 1
+  num_update_iter: 10
+  arena_runs: 16384
 
 policy:
   alphaholdem: /home/clouduser/zcc/Holdem/checkpoint/38000_model/model.ckpt

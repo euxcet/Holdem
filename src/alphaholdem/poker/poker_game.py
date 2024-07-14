@@ -17,6 +17,9 @@ from .agent.agent import Agent
 from .agent.random_agent import RandomAgent
 from ..utils.logger import log
 
+# TODO: refactor
+# create a base class, BetGame
+
 class PokerGame():
 
     DEFAULT_INITIAL_CHIPS = 200 # 200SB = 100BB

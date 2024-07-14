@@ -28,7 +28,7 @@ class SelfPlayCallback(DefaultCallbacks, ABC):
         self.rule_based_policies = rule_based_policies
         self.opponent_policies = Window(num_opponent_limit)
         self.opponent_circular_pointer = 0
-        self.win_rate_window = Window[float](self.WIN_RATE_WINDOW_SIZE)
+        self.win_rate_window = Window(self.WIN_RATE_WINDOW_SIZE)
         self.update_counter = Counter(num_update_iter)
         self.num_opponent_limit = num_opponent_limit
         self.arena = arena
@@ -37,6 +37,9 @@ class SelfPlayCallback(DefaultCallbacks, ABC):
         self.policy_type = policy_type
         self.learned_version = 0
 
+    def _get_policy_id(self, id: int) -> str:
+        return self.OPPONENT_PREFIX + str(id)
+
     def select_policy(self, agent_id: str, episode: EpisodeV2, **kwargs) -> str:
         if self.opponent_policies.capacity() == 0:
             return self.POLICY_TO_LEARN
@@ -44,7 +47,7 @@ class SelfPlayCallback(DefaultCallbacks, ABC):
             else np.random.choice(self.opponent_policies.window))
 
     def add_policy(self, algorithm: Algorithm) -> None:
-        policy_id = self.OPPONENT_PREFIX + str(self.opponent_policies.capacity())
+        policy_id = self._get_policy_id(self.opponent_policies.capacity())
         self.opponent_policies.push(policy_id)
         algorithm.add_policy(
             policy_id=policy_id,

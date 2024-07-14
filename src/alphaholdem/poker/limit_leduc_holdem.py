@@ -16,7 +16,6 @@ class LimitLeducHoldem(PokerGame):
         showdown_street: Street = Street.Turn,
         custom_board_cards: list[Card] = None,
         custom_player_hole_cards: list[list[Card]] = None,
-        num_street_board_cards: list[int] = [1, 0, 0],
     ) -> None:
         super().__init__(
             num_players=num_players,
@@ -28,11 +27,12 @@ class LimitLeducHoldem(PokerGame):
             num_hole_cards=1,
             verbose=verbose,
             num_runs=num_runs,
-            raise_pot_size=[0.75],
+            raise_pot_size=[],
             showdown_street=showdown_street,
             custom_board_cards=custom_board_cards,
             custom_player_hole_cards=custom_player_hole_cards,
-            num_street_board_cards=num_street_board_cards,
+            num_street_board_cards=[1, 0, 0],
+            action_shape=4,
         )
     
     def get_legal_action(self, player: int) -> list[Action]:
@@ -40,7 +40,6 @@ class LimitLeducHoldem(PokerGame):
             self.create_action(ActionType.Fold) if self._is_fold_legal() else None,
             self.create_action(ActionType.Check) if self._is_check_legal() else None,
             self.create_action(ActionType.Call) if self._is_call_legal() else None,
-            None,
         ]
         base_factor = 2 if self.street == Street.Preflop else 4
         street_raises = sum(self.player_street_num_raises)

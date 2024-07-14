@@ -52,6 +52,14 @@ class PPOPokerPolicy(Policy):
         }
         return F.softmax(self.model(obs)[0]).detach().cpu().numpy()
 
+    @override
+    def get_range_policy(self, env_obs: dict, game_obs: Observation) -> list[float]:
+        ...
+
+    @override
+    def get_all_policy(self) -> np.ndarray:
+        ...
+
     @staticmethod
     def _load_all_model_path(run_folder: str) -> list[str]:
         result = []

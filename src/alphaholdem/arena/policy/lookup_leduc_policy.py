@@ -4,8 +4,13 @@ from .policy import Policy
 from ...poker.component.observation import Observation
 
 class LookupLeducPolicy(Policy):
-    def __init__(self, strategy_path: str) -> None:
-        self.policy = self._load_from_file(strategy_path)
+    def __init__(self, strategy_path: str | None = None, policy: dict | None = None) -> None:
+        if policy is not None:
+            self.strategy_path = None
+            self.policy = policy
+        else:
+            self.strategy_path = strategy_path
+            self.policy = self._load_from_file(strategy_path)
 
     def _load_from_file(self, path: str) -> dict[str, list[float]]:
         result = dict()
@@ -48,9 +53,9 @@ class LookupLeducPolicy(Policy):
     @override
     def get_policy(self, env_obs: dict, game_obs: Observation) -> list[float]:
         cfr_policy = self.policy[self._get_history(env_obs)]
-        policy = [0.0] * 5
+        policy = [0.0] * 4
         # raise
-        policy[4] = cfr_policy[0]
+        policy[3] = cfr_policy[0]
         # check or call
         policy[1 if env_obs['action_mask'][1] == 1 else 2] = cfr_policy[1]
         # fold
@@ -59,4 +64,8 @@ class LookupLeducPolicy(Policy):
 
     @override
     def get_range_policy(self, env_obs: dict, game_obs: Observation) -> list[float]:
+        ...
+
+    @override
+    def get_all_policy(self) -> np.ndarray:
         ...

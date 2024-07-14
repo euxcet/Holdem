@@ -48,7 +48,7 @@ class LimitLeducHoldemEnv(PokerGameEnv):
                 ),
                 # 4(preflop, flop, turn, river) * num_players * max_num_actions_street, 5(fold, check, call, raise, all_in)
                 'action_history': spaces.Box( 
-                    low=0.0, high=5.0, shape=(4, num_players * self.max_num_actions_street, self.game.action_shape), dtype=np.float32
+                    low=0.0, high=5.0, shape=(4, num_players * self.max_num_actions_street, 5), dtype=np.float32
                 ),
                 'action_mask': spaces.Box(
                     low=0, high=1, shape=(self.game.action_shape,), dtype=np.int8
@@ -84,10 +84,7 @@ class LimitLeducHoldemEnv(PokerGameEnv):
             num_action = action_street_count[action.player][street]
             if num_action >= self.max_num_actions_street:
                 continue
-            if action.type == ActionType.Raise:
-                action_history[street][action.player * self.max_num_actions_street + num_action][action.type.value] = action.raise_pot
-            else:
-                action_history[street][action.player * self.max_num_actions_street + num_action][action.type.value] = 1
+            action_history[street][action.player * self.max_num_actions_street + num_action][action.type.value] = 1
             action_street_count[action.player][street] += 1
         action_mask = np.zeros(self.game.action_shape, np.int8)
         for i in range(self.game.action_shape):

@@ -15,7 +15,8 @@ class NoLimitTexasHoldem(PokerGame):
         showdown_street: Street = Street.Showdown,
         custom_board_cards: list[Card] = None,
         custom_player_hole_cards: list[list[Card]] = None,
-        legal_raise_pot_size: list[float] = [0.25, 0.5, 0.75, 1.25],
+        raise_pot_size: list[float] = [0.5, 0.75, 1, 1.5, 2],
+        legal_raise_pot_size: list[float] = [0.5, 0.75, 1, 1.5, 2],
     ) -> None:
         super().__init__(
             num_players=num_players,
@@ -27,5 +28,6 @@ class NoLimitTexasHoldem(PokerGame):
             showdown_street=showdown_street,
             custom_board_cards=custom_board_cards,
             custom_player_hole_cards=custom_player_hole_cards,
+            raise_pot_size=raise_pot_size,
             legal_raise_pot_size=legal_raise_pot_size,
         )

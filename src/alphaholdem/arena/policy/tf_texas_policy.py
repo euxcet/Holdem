@@ -67,3 +67,7 @@ class TFTexasPolicy(Policy):
     @override
     def get_range_policy(self, env_obs: dict, game_obs: Observation) -> list[float]:
         ...
+
+    @override
+    def get_all_policy(self) -> np.ndarray:
+        ...

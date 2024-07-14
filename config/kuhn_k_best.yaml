@@ -49,10 +49,9 @@ self_play:
   type: k_best
   arena: kuhn
   policy_type: kuhn
-  opponent_policies: [random]
+  rule_based_policies: []
   num_opponent_limit: 6
   num_update_iter: 5
-  win_rate_window_size: 6
   arena_runs: 8192
 
 policy:
