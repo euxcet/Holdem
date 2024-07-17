@@ -70,12 +70,15 @@ class RangeLimitLeducHoldemEnv(RangePokerGameEnv):
             super().step(None)
         else:
             action_prob = action.copy()
+            action_mask = np.array([
+                0 if self.last_observation.legal_actions[i] is None else 1
+                for i in range(4)
+            ])
             for i in range(3):
-                s = sum(action_prob[i * 4 : (i + 1) * 4])
-                if s < 1e-5:
-                    action_prob[i * 4 : (i + 1) * 4] = [0.25, 0.25, 0.25, 0.25]
-                else:
-                    action_prob[i * 4 : (i + 1) * 4] /= s
+                if sum(action_prob[i * 4 : (i + 1) * 4] * action_mask) < 1e-5:
+                    action_prob[i * 4 : (i + 1) * 4] = action_mask.astype(np.float32)
+                s = sum(action_prob[i * 4 : (i + 1) * 4] * action_mask)
+                action_prob[i * 4 : (i + 1) * 4] *= action_mask.astype(np.float32) / s
             prob = np.zeros(4)
             for i in range(12):
                 prob[i % 4] += action_prob[i]

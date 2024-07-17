@@ -12,10 +12,12 @@ class RangeLeducJudger(Judger):
         self,
         pot: int,
         board_cards: list[Card],
+        player_bet: list[int],
         player_fold: list[bool],
     ) -> list[int]:
         payoff: list[int] = [0, 0]
         if player_fold.count(False) == 1:
+            payoff = [-player_bet[0], -player_bet[1]]
             winner = player_fold.index(False)
             payoff[winner] += pot
             return payoff

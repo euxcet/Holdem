@@ -1,7 +1,7 @@
 game:
   type: leduc
   num_players: 2
-  showdown_street: showdown
+  showdown_street: turn
   legal_raise_pot_size: []
   num_runs: 20
   initial_chips: 100
@@ -57,5 +57,5 @@ self_play:
 
 policy:
   alphaholdem: /home/clouduser/zcc/Holdem/checkpoint/38000_model/model.ckpt
-  leduc_nash: /home/clouduser/zcc/Holdem/strategy/leduc.txt
+  leduc_nash: /home/clouduser/zcc/Holdem/strategy/leduc_nash.txt
   kuhn_nash: /home/clouduser/zcc/Holdem/strategy/kuhn_nash.txt

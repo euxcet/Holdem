@@ -14,8 +14,8 @@ class TestLeducPolicy():
 
     def test_range_policy(self):
         ppos = PPORangeLeducPolicy.load_policies_from_run('/home/clouduser/ray_results/PPO_2024-07-17_06-18-22')
-        mean, var = LeducArena('/home/clouduser/zcc/Holdem/strategy/leduc.txt').policy_vs_policy(
-            policy0=LookupLeducPolicy('/home/clouduser/zcc/Holdem/strategy/leduc.txt'),
+        mean, var = LeducArena('/home/clouduser/zcc/Holdem/strategy/leduc_nash.txt').policy_vs_policy(
+            policy0=LookupLeducPolicy('/home/clouduser/zcc/Holdem/strategy/leduc_nash.txt'),
             policy1=ppos[-1],
             runs=16384,
         )
@@ -24,8 +24,8 @@ class TestLeducPolicy():
     @pytest.mark.skipif(SKIP, reason="SKIP == True")
     def test_tree(self):
         ppos = PPOLeducPolicy.load_policies_from_run('/home/clouduser/ray_results/PPO_2024-07-13_15-04-54')
-        mean, var = LeducArena('/home/clouduser/zcc/Holdem/strategy/leduc.txt').policy_vs_policy(
-            policy0=LookupLeducPolicy('/home/clouduser/zcc/Holdem/strategy/leduc.txt'),
+        mean, var = LeducArena('/home/clouduser/zcc/Holdem/strategy/leduc_nash.txt').policy_vs_policy(
+            policy0=LookupLeducPolicy('/home/clouduser/zcc/Holdem/strategy/leduc_nash.txt'),
             policy1=ppos[-1],
             runs=16384,
         )

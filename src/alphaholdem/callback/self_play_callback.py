@@ -41,11 +41,14 @@ class SelfPlayCallback(DefaultCallbacks, ABC):
         return self.OPPONENT_PREFIX + str(id)
 
     def select_policy(self, agent_id: str, episode: EpisodeV2, **kwargs) -> str:
-        if self.opponent_policies.capacity() == 0:
-            return self.POLICY_TO_LEARN
         if episode.episode_id % 2 == int(agent_id.split('_')[-1]):
             return self.POLICY_TO_LEARN
-        return np.random.choice(self.opponent_policies.window)
+        return np.random.choice(self.rule_based_policies)
+        # if self.opponent_policies.capacity() == 0:
+        #     return self.POLICY_TO_LEARN
+        # if episode.episode_id % 2 == int(agent_id.split('_')[-1]):
+        #     return self.POLICY_TO_LEARN
+        # return np.random.choice(self.opponent_policies.window)
 
     def add_policy(self, algorithm: Algorithm) -> None:
         policy_id = self._get_policy_id(self.opponent_policies.capacity())
@@ -84,12 +87,21 @@ class SelfPlayCallback(DefaultCallbacks, ABC):
 
     def log_result(self, algorithm: Algorithm, result: dict, policy: Policy) -> None:
         log.info(f"Iter={algorithm.iteration} win_rate={result['win_rate']}")
+        if self.arena.nash_policy is not None:
+            log.info(f"win_rate_vs_nash={result['win_rate_vs_nash']}")
         policy.log()
 
     def on_train_result(self, *, algorithm: Algorithm, result: dict, **kwargs) -> None:
         self.current_policy = self.policy_type(model=algorithm.get_policy(self.POLICY_TO_LEARN).model)
         self.calc_metric(result, self.current_policy)
         self.log_result(algorithm, result, self.current_policy)
+
         if self.update_counter.count():
             self.new_policy(algorithm, result)
+
+        # if algorithm.iteration == 1:
+        #     self.new_policy(algorithm, result)
+        # else:
+        #     if self.update_counter.count():
+        #         self.new_policy(algorithm, result)
         result["learned_version"] = self.learned_version

@@ -8,6 +8,8 @@ class LeducNode():
         action_history: str,
         action_prob: list[float],
         is_terminal: bool,
+        hole_cards: str,
+        board_card: str,
         payoff: list[float] = [0, 0],
     ) -> None:
         self.player = player
@@ -16,9 +18,12 @@ class LeducNode():
         self.action_prob = action_prob
         self.is_terminal = is_terminal
         self.payoff = payoff
+        self.hole_cards = hole_cards
+        self.board_card = board_card
     
     def dfs_ev(self, reach_prob: float) -> float:
         if self.is_terminal:
+            # print('Terminal', self.action_history, self.hole_cards, self.board_card, self.payoff, reach_prob)
             return reach_prob * self.payoff[0]
         payoff = 0.0
         for i, child in enumerate(self.son):
@@ -60,6 +65,8 @@ class LeducTree():
             son=son,
             action_history="",
             action_prob=[1 / 15] * 6 + [1 / 30] * 18,
+            hole_cards="",
+            board_card="",
             is_terminal=False,
             payoff=[],
         )
@@ -101,6 +108,8 @@ class LeducTree():
                 action_history=action_history,
                 action_prob=[],
                 is_terminal=True,
+                hole_cards=hole_cards,
+                board_card=board_card,
                 payoff=payoff,
             )
 
@@ -112,6 +121,8 @@ class LeducTree():
                 action_history=action_history,
                 action_prob=[],
                 is_terminal=True,
+                hole_cards=hole_cards,
+                board_card=board_card,
                 payoff=[c * pot[0], -c * pot[1]],
             )
         
@@ -153,7 +164,8 @@ class LeducTree():
             action_prob.append(strategy[player][key][1])
         # call or (check check)
         if action_history[-1] != '/':
-            pot[player] += 2 * (street + 1)
+            if action_history[-1] == 'r':
+                pot[player] += 2 * (street + 1)
             son.append(self.create_node(
                 strategy=strategy,
                 player = 0,
@@ -164,7 +176,8 @@ class LeducTree():
                 num_street_raise=0,
                 pot=pot,
             ))
-            pot[player] -= 2 * (street + 1)
+            if action_history[-1] == 'r':
+                pot[player] -= 2 * (street + 1)
             action_prob.append(strategy[player][key][1])
         # fold
         if action_history[-1] == 'r':
@@ -180,11 +193,14 @@ class LeducTree():
             ))
             action_prob.append(strategy[player][key][2])
 
+        # print(player, action_history, hole_cards, board_card, sum(action_prob))
         return LeducNode(
             player=player,
             son=son,
             action_history=action_history,
             action_prob=action_prob,
             is_terminal=False,
+            hole_cards=hole_cards,
+            board_card=board_card,
             payoff=[],
         )

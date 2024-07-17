@@ -56,5 +56,5 @@ self_play:
 
 policy:
   alphaholdem: /home/clouduser/zcc/Holdem/checkpoint/38000_model/model.ckpt
-  leduc_nash: /home/clouduser/zcc/Holdem/strategy/leduc.txt
+  leduc_nash: /home/clouduser/zcc/Holdem/strategy/leduc_nash.txt
   kuhn_nash: /home/clouduser/zcc/Holdem/strategy/kuhn_nash.txt

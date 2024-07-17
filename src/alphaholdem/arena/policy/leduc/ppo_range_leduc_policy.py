@@ -70,14 +70,13 @@ class PPORangeLeducPolicy(PPOPokerPolicy):
         }
         return self.model(obs)[0].detach().cpu().numpy()
 
-    def _policy_to_prob(self, policy: np.ndarray) -> np.ndarray:
+    def _policy_to_prob(self, policy: np.ndarray, action_mask: np.ndarray) -> np.ndarray:
         action_prob = policy.reshape((12, 2))[:, 0].copy() # discard vars
         for i in range(3):
-            s = sum(action_prob[i * 4 : (i + 1) * 4])
-            if s < 1e-5:
-                action_prob[i * 4 : (i + 1) * 4] = [0.25, 0.25, 0.25, 0.25]
-            else:
-                action_prob[i * 4 : (i + 1) * 4] /= s
+            if sum(action_prob[i * 4 : (i + 1) * 4] * action_mask) < 1e-5:
+                action_prob[i * 4 : (i + 1) * 4] = action_mask.astype(np.float32)
+            s = sum(action_prob[i * 4 : (i + 1) * 4] * action_mask)
+            action_prob[i * 4 : (i + 1) * 4] *= action_mask.astype(np.float32) / s
         return action_prob
 
     @override
@@ -95,7 +94,7 @@ class PPORangeLeducPolicy(PPOPokerPolicy):
                 'action_history': action_history,
                 'action_mask': action_mask,
                 'board_card': board_card,
-            }))
+            }), action_mask)
             #  0 J_fold  1 J_check  2 J_call  3 J_raise
             #  4 Q_fold  5 Q_check  6 Q_call  7 Q_raise
             #  8 K_fold  9 K_check 10 K_call 11 K_raise

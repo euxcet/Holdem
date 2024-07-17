@@ -4,8 +4,7 @@ from ..heuristic_base import HeuristicBase
 class LeducCFRHeuristic(HeuristicBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.strategy = self.load_strategy('/home/clouduser/zcc/AlphaHoldem/torch/strategy/player0.txt')
-        self.strategy.update(self.load_strategy('/home/clouduser/zcc/AlphaHoldem/torch/strategy/player1.txt'))
+        self.strategy = self.load_strategy('/home/clouduser/zcc/Holdem/strategy/leduc_nash.txt')
 
     def load_strategy(self, save_file: str) -> dict[str, list[float]]:
         result = dict()
@@ -35,9 +34,11 @@ class LeducCFRHeuristic(HeuristicBase):
         if history[-1] == 'c' and street_action > 1:
             history += '/'
         history += ':'
+        if history not in self.strategy:
+            print('history', actions, action_mask, history)
         action = np.random.choice(3, p=self.strategy[history])
         if action == 0:
-            action = 4
+            action = 3
         elif action == 2:
             action = 0
         else:

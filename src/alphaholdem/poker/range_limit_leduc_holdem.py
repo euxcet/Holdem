@@ -69,6 +69,7 @@ class RangeLimitLeducHoldem(RangePokerGame):
             pot = self.pot,
             board_cards = self.board_cards,
             player_fold = self.player_fold,
+            player_bet = self.player_bet,
         )
     
     def get_legal_action(self, player: int) -> list[Action]:
