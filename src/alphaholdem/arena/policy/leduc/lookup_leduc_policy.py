@@ -1,7 +1,7 @@
 import numpy as np
 from typing_extensions import override
-from .policy import Policy
-from ...poker.component.observation import Observation
+from ..policy import Policy
+from ....poker.component.observation import Observation
 
 class LookupLeducPolicy(Policy):
     def __init__(self, strategy_path: str | None = None, policy: dict | None = None) -> None:

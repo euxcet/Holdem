@@ -1,5 +1,5 @@
 game:
-  type: leduc
+  type: range_leduc
   num_players: 2
   showdown_street: showdown
   legal_raise_pot_size: []
@@ -27,7 +27,7 @@ rllib:
   verbose: 2
 
 hyper:
-  model: hunl_conv
+  model: range_leduc
   learning_rate: 0.00002
   clip_param: 0.2
   entropy_coeff: 0.01
@@ -41,15 +41,15 @@ hyper:
   opponent_count: 4
   num_update_iter: 20
   win_rate_threshold: 100
-  checkpoint_frequency: 10
-  checkpoint_num_to_keep: 10
+  checkpoint_frequency: 1
+  checkpoint_num_to_keep: 5
   stop_timesteps_total: 2000000000
   stop_training_iteration: 400000
 
 self_play:
   type: naive
   arena: leduc
-  policy_type: leduc
+  policy_type: range_leduc
   rule_based_policies: []
   num_opponent_limit: 100
   num_update_iter: 10000000

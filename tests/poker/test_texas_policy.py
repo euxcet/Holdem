@@ -1,7 +1,7 @@
 import pytest
 from alphaholdem.arena.texas_arena import TexasArena
-from alphaholdem.arena.policy.ppo_texas_policy import PPOTexasPolicy
-from alphaholdem.arena.policy.tf_texas_policy import TFTexasPolicy
+from alphaholdem.arena.policy.hunl.ppo_texas_policy import PPOTexasPolicy
+from alphaholdem.arena.policy.hunl.tf_texas_policy import TFTexasPolicy
 
 class TestTexasPolicy():
     SKIP = True

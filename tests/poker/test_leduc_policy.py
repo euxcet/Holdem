@@ -2,8 +2,9 @@ import pytest
 from alphaholdem.poker.limit_leduc_holdem_env import LimitLeducHoldemEnv
 from alphaholdem.poker.component.card import Card
 from alphaholdem.poker.component.street import Street
-from alphaholdem.arena.policy.ppo_leduc_policy import PPOLeducPolicy
-from alphaholdem.arena.policy.lookup_leduc_policy import LookupLeducPolicy
+from alphaholdem.arena.policy.leduc.ppo_leduc_policy import PPOLeducPolicy
+from alphaholdem.arena.policy.leduc.ppo_range_leduc_policy import PPORangeLeducPolicy
+from alphaholdem.arena.policy.leduc.lookup_leduc_policy import LookupLeducPolicy
 from alphaholdem.arena.leduc_arena import LeducArena
 
 class TestLeducPolicy():
@@ -11,8 +12,16 @@ class TestLeducPolicy():
     # run_folder = '/home/clouduser/ray_results/PPO_2024-05-18_15-09-37'
     cfr = LookupLeducPolicy('strategy/leduc.txt')
 
+    def test_range_policy(self):
+        ppos = PPORangeLeducPolicy.load_policies_from_run('/home/clouduser/ray_results/PPO_2024-07-17_06-18-22')
+        mean, var = LeducArena('/home/clouduser/zcc/Holdem/strategy/leduc.txt').policy_vs_policy(
+            policy0=LookupLeducPolicy('/home/clouduser/zcc/Holdem/strategy/leduc.txt'),
+            policy1=ppos[-1],
+            runs=16384,
+        )
+        print(mean, var)
 
-    # @pytest.mark.skipif(SKIP, reason="SKIP == True")
+    @pytest.mark.skipif(SKIP, reason="SKIP == True")
     def test_tree(self):
         ppos = PPOLeducPolicy.load_policies_from_run('/home/clouduser/ray_results/PPO_2024-07-13_15-04-54')
         mean, var = LeducArena('/home/clouduser/zcc/Holdem/strategy/leduc.txt').policy_vs_policy(
@@ -25,7 +34,7 @@ class TestLeducPolicy():
     # Fold Check Call All_in Raise_25% Raise_50% Raise_75% Raise_125%
     # 0    1     2    3      4         5         6         7
     @pytest.mark.skipif(SKIP, reason="SKIP == True")
-    def test_range_policy(self):
+    def test_range_policy_(self):
         action_history = []
         board_cards = Card.from_str_list([])
         env = LimitLeducHoldemEnv(

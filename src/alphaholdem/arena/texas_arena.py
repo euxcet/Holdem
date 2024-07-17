@@ -2,7 +2,7 @@ import numpy as np
 from .envs.no_limit_texas_holdem_env import create_no_limit_holdem_env
 from ..poker.no_limit_texas_holdem_env import NoLimitTexasHoldemEnv
 from .policy.ppo_poker_policy import PPOPokerPolicy
-from .policy.tf_texas_policy import TFTexasPolicy
+from .policy.hunl.tf_texas_policy import TFTexasPolicy
 
 # TODO: refactor
 class TexasArena():

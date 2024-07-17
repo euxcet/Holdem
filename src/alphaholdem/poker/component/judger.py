@@ -1,7 +1,6 @@
 from .card import Card
 from .hand import Hand, HandType
 
-
 class Judger():
 
     HAND_CARD_SIZE = 5

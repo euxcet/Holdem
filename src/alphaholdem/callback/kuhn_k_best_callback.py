@@ -3,7 +3,7 @@ from ray.rllib.algorithms.callbacks import DefaultCallbacks
 from ray.rllib.algorithms import Algorithm
 from ray.rllib.evaluation.episode_v2 import EpisodeV2
 from ..arena.kuhn_arena import KuhnArena
-from ..arena.policy.ppo_kuhn_policy import PPOKuhnPolicy
+from ..arena.policy.kuhn.ppo_kuhn_policy import PPOKuhnPolicy
 from ..utils.logger import log
 from ..utils.window import Window
 from ..utils.counter import Counter

@@ -41,16 +41,18 @@ class RangeLimitLeducHoldemEnv(RangePokerGameEnv):
             circular_train=circular_train,
             payoff_max=payoff_max,
         )
-        self.max_num_actions_street = 6
+        self.max_num_actions_street = 2
         self.observation_spaces = self._to_dict([
             spaces.Dict({
-                # 4(hole, flop, turn, river) * 4 * 13
-                'observation': spaces.Box(
-                    low=0.0, high=1.0, shape=(4, 4, 13), dtype=np.float32
-                ),
-                # 4(preflop, flop, turn, river) * num_players * max_num_actions_street, 5(fold, check, call, raise, all_in)
+                # 2(preflop, flop) * num_players * max_num_actions_street, 5(fold, check, call, raise, all_in)
                 'action_history': spaces.Box( 
-                    low=0.0, high=5.0, shape=(4, num_players * self.max_num_actions_street, 5), dtype=np.float32
+                    low=0.0, high=5.0, shape=(2, num_players * self.max_num_actions_street, 5), dtype=np.float32
+                ),
+                'board_card': spaces.Box(
+                    low=0.0, high=1.0, shape=(3,), dtype=np.float32
+                ),
+                'ranges': spaces.Box( 
+                    low=0.0, high=1.0, shape=(2, 3), dtype=np.float32
                 ),
                 'action_mask': spaces.Box(
                     low=0, high=1, shape=(self.game.action_shape,), dtype=np.int8
@@ -59,55 +61,61 @@ class RangeLimitLeducHoldemEnv(RangePokerGameEnv):
         ])
         # Fold Check Call All_in Raise
         self.action_spaces = self._to_dict([
-            # spaces.Box(low=-10, high=10, shape=(3 * self.game.action_shape,), dtype=np.float32)
-            spaces.Box(low=0.001, high=1, shape=(self.game.action_shape,), dtype=np.float32)
-            # spaces.Box(low=-10, high=10, shape=(self.game.action_shape,), dtype=np.float32)
-            # spaces.Discrete(self.game.action_shape)
+            spaces.Box(low=0, high=1, shape=(3 * self.game.action_shape,), dtype=np.float32)
              for _ in range(self.num_agents)
         ])
 
-    def step(self, action: list[float]) -> None:
-        # print('action', action.shape, action)
+    def step(self, action: np.ndarray | None) -> None:
         if action is None:
             super().step(None)
         else:
-            # hole = self.last_observation.hole_cards[0].rank - 9
-
-            hole = 0
-            prob = np.array(action[hole * self.game.action_shape : (hole + 1) * self.game.action_shape])
-            # prob = np.exp(prob) / np.sum(np.exp(prob), axis=0, keepdims=True)
-            prob = prob / np.sum(prob)
+            action_prob = action.copy()
+            for i in range(3):
+                s = sum(action_prob[i * 4 : (i + 1) * 4])
+                if s < 1e-5:
+                    action_prob[i * 4 : (i + 1) * 4] = [0.25, 0.25, 0.25, 0.25]
+                else:
+                    action_prob[i * 4 : (i + 1) * 4] /= s
+            prob = np.zeros(4)
+            for i in range(12):
+                prob[i % 4] += action_prob[i]
+            prob /= np.sum(prob)
             sample = np.random.choice(self.game.action_shape, p=prob)
+            for i in range(3):
+                self.game.players_range[self.game.current_player][i] *= action_prob[i * 4 + sample]
             super().step(self.last_observation.legal_actions[sample])
-            # super().step(self.last_observation.legal_actions[action])
 
     def observe_current(self) -> dict:
         return self.observe(self.agent_selection)
 
     def observe(self, agent: str) -> dict:
         observation = self.game.observe(self._agent_id_to_game_id(self._agent_name_to_id(agent)))
-        cards = np.zeros((4, 4, 13), np.float32)
-        for hole_card in observation.hole_cards:
-            cards[0][hole_card.suit][hole_card.rank] = 1.0
-        for board_card in observation.board_cards:
-            cards[1][board_card.suit][board_card.rank] = 1.0
+        board_card = np.zeros((3,)).astype(np.float32)
+        if len(observation.board_cards) > 0:
+            board_card[observation.board_cards[0].rank - 9] = 1.0
+        ranges = np.array(observation.players_range).astype(np.float32)
         # street, player, num_actions_street, action
-        action_history = np.zeros((4, self.num_players * self.max_num_actions_street, 5), np.float32)
+        action_history = np.zeros((2, self.num_players * self.max_num_actions_street, 5), np.float32)
         action_street_count = [[0 for i in range(4)] for j in range(self.num_players)]
         for action in observation.log_action:
             street = action.street.value
-            if street >= 4:
+            if street >= 2:
                 continue
             num_action = action_street_count[action.player][street]
             if num_action >= self.max_num_actions_street:
                 continue
             if action.type == ActionType.Raise:
-                action_history[street][action.player * self.max_num_actions_street + num_action][action.type.value] = action.raise_pot
+                action_history[street][action.player * self.max_num_actions_street + num_action][action.type.value] = 1
             else:
                 action_history[street][action.player * self.max_num_actions_street + num_action][action.type.value] = 1
             action_street_count[action.player][street] += 1
         action_mask = np.zeros(self.game.action_shape, np.int8)
         for i in range(self.game.action_shape):
             action_mask[i] = 0 if observation.legal_actions[i] is None else 1
-        return {"observation": cards, "action_history": action_history, "action_mask": action_mask}
+        return {
+            'ranges': ranges,
+            'action_history': action_history,
+            'action_mask': action_mask,
+            'board_card': board_card,
+        }
         

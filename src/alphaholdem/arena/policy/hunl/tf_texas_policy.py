@@ -1,8 +1,8 @@
 import numpy as np
 from typing_extensions import override
-from .policy import Policy
-from ...tensorflow.predictor import Predictor
-from ...poker.component.observation import Observation
+from ..policy import Policy
+from ....tensorflow.predictor import Predictor
+from ....poker.component.observation import Observation
 
 class TFTexasPolicy(Policy):
     def __init__(self, model_path: str = None, device: str = 'cuda') -> None:

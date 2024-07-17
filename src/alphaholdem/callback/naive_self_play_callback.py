@@ -24,9 +24,23 @@ class NaiveSelfPlayCallback(SelfPlayCallback):
             policy_type=policy_type
         )
         self.circular_pointer = 0
+        self.best_metric = -100
+        self.last_update = -10000
 
     @override
-    def new_policy(self, algorithm: Algorithm) -> None:
+    def new_policy(self, algorithm: Algorithm, result: dict) -> None:
+        # if algorithm.iteration > self.last_update + 50:
+        #     self.last_update = algorithm.iteration
+        #     if not self.opponent_policies.full():
+        #         self.add_policy(algorithm)
+        #     else:
+        #         self.replace_policy(algorithm, self._get_policy_id(self.circular_pointer))
+        #         self.circular_pointer = (self.circular_pointer + 1) % self.num_opponent_limit
+        #     self.best_metric = -100
+        # elif result['win_rate_vs_nash'] > self.best_metric:
+        #     self.best_metric = result['win_rate_vs_nash']
+        #     self.replace_policy(algorithm, self._get_policy_id(self.circular_pointer))
+
         if not self.opponent_policies.full():
             self.add_policy(algorithm)
         else:

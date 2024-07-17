@@ -3,9 +3,10 @@ from .kuhn_k_best_callback import create_kuhn_k_best_callback
 from .naive_self_play_callback import NaiveSelfPlayCallback
 from ..arena.kuhn_arena import KuhnArena
 from ..arena.leduc_arena import LeducArena
-from ..arena.policy.ppo_kuhn_policy import PPOKuhnPolicy
-from ..arena.policy.ppo_range_kuhn_policy import PPORangeKuhnPolicy
-from ..arena.policy.ppo_leduc_policy import PPOLeducPolicy
+from ..arena.policy.kuhn.ppo_kuhn_policy import PPOKuhnPolicy
+from ..arena.policy.kuhn.ppo_range_kuhn_policy import PPORangeKuhnPolicy
+from ..arena.policy.leduc.ppo_leduc_policy import PPOLeducPolicy
+from ..arena.policy.leduc.ppo_range_leduc_policy import PPORangeLeducPolicy
 
 def get_callback(cfg: TrainConfig):
     if cfg.self_play.arena == 'kuhn':
@@ -21,6 +22,8 @@ def get_callback(cfg: TrainConfig):
         policy_type = PPORangeKuhnPolicy
     elif cfg.self_play.policy_type == 'leduc':
         policy_type = PPOLeducPolicy
+    elif cfg.self_play.policy_type == 'range_leduc':
+        policy_type = PPORangeLeducPolicy
     else:
         raise Exception
 

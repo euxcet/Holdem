@@ -43,8 +43,9 @@ class SelfPlayCallback(DefaultCallbacks, ABC):
     def select_policy(self, agent_id: str, episode: EpisodeV2, **kwargs) -> str:
         if self.opponent_policies.capacity() == 0:
             return self.POLICY_TO_LEARN
-        return (self.POLICY_TO_LEARN if episode.episode_id % 2 == int(agent_id.split('_')[-1])
-            else np.random.choice(self.opponent_policies.window))
+        if episode.episode_id % 2 == int(agent_id.split('_')[-1]):
+            return self.POLICY_TO_LEARN
+        return np.random.choice(self.opponent_policies.window)
 
     def add_policy(self, algorithm: Algorithm) -> None:
         policy_id = self._get_policy_id(self.opponent_policies.capacity())
@@ -63,7 +64,7 @@ class SelfPlayCallback(DefaultCallbacks, ABC):
         self.learned_version += 1
 
     @abstractmethod
-    def new_policy(self, algorithm: Algorithm) -> None:
+    def new_policy(self, algorithm: Algorithm, result: dict) -> None:
         ...
 
     def calc_metric(self, result: dict, policy: Policy) -> None:
@@ -90,5 +91,5 @@ class SelfPlayCallback(DefaultCallbacks, ABC):
         self.calc_metric(result, self.current_policy)
         self.log_result(algorithm, result, self.current_policy)
         if self.update_counter.count():
-            self.new_policy(algorithm)
+            self.new_policy(algorithm, result)
         result["learned_version"] = self.learned_version

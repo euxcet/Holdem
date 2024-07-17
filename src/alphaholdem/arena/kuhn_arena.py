@@ -5,9 +5,9 @@ import numpy as np
 
 from alphaholdem.arena.policy.policy import Policy
 from .arena import Arena
-from .policy.ppo_kuhn_policy import PPOKuhnPolicy
-from .policy.ppo_range_kuhn_policy import PPORangeKuhnPolicy
-from .policy.lookup_kuhn_policy import LookupKuhnPolicy
+from .policy.kuhn.ppo_kuhn_policy import PPOKuhnPolicy
+from .policy.kuhn.ppo_range_kuhn_policy import PPORangeKuhnPolicy
+from .policy.kuhn.lookup_kuhn_policy import LookupKuhnPolicy
 from .tree.kuhn_tree import KuhnTree
 
 class KuhnArena(Arena):
