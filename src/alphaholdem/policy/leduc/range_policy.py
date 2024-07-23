@@ -53,7 +53,7 @@ class RangeLeducCFRHeuristic(HeuristicBase):
             result.append(prob[1] if action_mask[1] == 1 else 0) # check
             result.append(prob[1] if action_mask[2] == 1 else 0) # call
             result.append(prob[0] if action_mask[3] == 1 else 0) # raise
-        print(result)
+        # print(result)
 
         return result
 

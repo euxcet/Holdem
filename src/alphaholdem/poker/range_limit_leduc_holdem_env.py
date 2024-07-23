@@ -46,7 +46,7 @@ class RangeLimitLeducHoldemEnv(RangePokerGameEnv):
             spaces.Dict({
                 # 2(preflop, flop) * num_players * max_num_actions_street, 5(fold, check, call, raise, all_in)
                 'action_history': spaces.Box( 
-                    low=0.0, high=5.0, shape=(2, num_players * self.max_num_actions_street, 5), dtype=np.float32
+                    low=0.0, high=1.0, shape=(2, num_players * self.max_num_actions_street, 5), dtype=np.float32
                 ),
                 'board_card': spaces.Box(
                     low=0.0, high=1.0, shape=(3,), dtype=np.float32
@@ -61,34 +61,16 @@ class RangeLimitLeducHoldemEnv(RangePokerGameEnv):
         ])
         # Fold Check Call All_in Raise
         self.action_spaces = self._to_dict([
-            spaces.Box(low=0, high=1, shape=(3 * self.game.action_shape,), dtype=np.float32)
+            spaces.Box(low=-1, high=1, shape=(3 * self.game.action_shape,), dtype=np.float32)
              for _ in range(self.num_agents)
         ])
 
     def step(self, action: np.ndarray | None) -> None:
+        obs = self.observe_current()
         if action is None:
             super().step(None)
         else:
             super().step(action)
-
-            # action_prob = action.copy()
-            # action_mask = np.array([
-            #     0 if self.last_observation.legal_actions[i] is None else 1
-            #     for i in range(4)
-            # ])
-            # for i in range(3):
-            #     if sum(action_prob[i * 4 : (i + 1) * 4] * action_mask) < 1e-5:
-            #         action_prob[i * 4 : (i + 1) * 4] = action_mask.astype(np.float32)
-            #     s = sum(action_prob[i * 4 : (i + 1) * 4] * action_mask)
-            #     action_prob[i * 4 : (i + 1) * 4] *= action_mask.astype(np.float32) / s
-            # prob = np.zeros(4)
-            # for i in range(12):
-            #     prob[i % 4] += action_prob[i]
-            # prob /= np.sum(prob)
-            # sample = np.random.choice(self.game.action_shape, p=prob)
-            # for i in range(3):
-            #     self.game.player_range[self.game.current_player][i] *= action_prob[i * 4 + sample]
-            # super().step(self.last_observation.legal_actions[sample])
 
     def observe_current(self) -> dict:
         return self.observe(self.agent_selection)
@@ -109,10 +91,7 @@ class RangeLimitLeducHoldemEnv(RangePokerGameEnv):
             num_action = action_street_count[action.player][street]
             if num_action >= self.max_num_actions_street:
                 continue
-            if action.type == ActionType.Raise:
-                action_history[street][action.player * self.max_num_actions_street + num_action][action.type.value] = 1
-            else:
-                action_history[street][action.player * self.max_num_actions_street + num_action][action.type.value] = 1
+            action_history[street][action.player * self.max_num_actions_street + num_action][action.type.value] = 1
             action_street_count[action.player][street] += 1
         action_mask = np.zeros(self.game.action_shape, np.int8)
         for i in range(self.game.action_shape):

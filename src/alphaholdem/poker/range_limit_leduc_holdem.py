@@ -66,21 +66,23 @@ class RangeLimitLeducHoldem(RangePokerGame):
         )
 
     def step(self, action: np.ndarray) -> Observation:
+        action = action.clip(0, 1)
         action_prob = action.copy()
         legal_actions = self.get_legal_action(self.current_player)
         action_mask = np.array([
             0 if legal_actions[i] is None else 1
             for i in range(4)
-        ])
+        ]).astype(np.float32)
         for i in range(3):
             if sum(action_prob[i * 4 : (i + 1) * 4] * action_mask) < 1e-5:
-                action_prob[i * 4 : (i + 1) * 4] = action_mask.astype(np.float32)
+                action_prob[i * 4 : (i + 1) * 4] = action_mask
             s = sum(action_prob[i * 4 : (i + 1) * 4] * action_mask)
-            action_prob[i * 4 : (i + 1) * 4] *= action_mask.astype(np.float32) / s
+            action_prob[i * 4 : (i + 1) * 4] *= action_mask / s
         prob = np.zeros(4)
         for i in range(12):
             prob[i % 4] += action_prob[i]
         prob /= np.sum(prob)
+        sample = np.random.choice(self.action_shape, p=prob)
         sample = np.random.choice(self.action_shape, p=prob)
         for i in range(3):
             self.player_range[self.current_player][i] *= action_prob[i * 4 + sample]

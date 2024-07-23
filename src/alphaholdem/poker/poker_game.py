@@ -462,6 +462,7 @@ class PokerGame():
         if self.verbose:
             log.info(f"[yellow][bold]Observation[/bold][/yellow]\n{self.observe(self.current_player)}", extra=dict(markup=True))
             log.info(f"[red][bold]Take Action[/bold][/red]\n{action}", extra=dict(markup=True))
+        assert action is not None
         action = action if action is not None else self.create_action(ActionType.Fold)
         action.street = self.street
         player = self.current_player

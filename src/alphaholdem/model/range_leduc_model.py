@@ -1,3 +1,4 @@
+import numpy as np
 import torch
 from torch import nn
 from ray.rllib.models.torch.torch_modelv2 import TorchModelV2
@@ -33,7 +34,14 @@ class RangeLeducModel(TorchModelV2, nn.Module):
         out = torch.cat((ranges, action_history, action_mask, board_card), dim=1)
         policy = self.policy_fn(out)
         self._value_out = self.value_fn(out)
-        policy = torch.clamp(policy, min=0, max=1)
+        policy = torch.clamp(policy, min=1e-3, max=1)
+        policy[:, :12] = torch.softmax(policy[:, :12], dim=1)
+
+        # test = torch.tensor(np.array([
+        #     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10,]
+        #     for i in range(policy.shape[0])
+        # ]).astype(np.float32)).to('cuda')
+        # print("shape", test.shape, policy.shape)
         return policy, state
 
     def value_function(self):

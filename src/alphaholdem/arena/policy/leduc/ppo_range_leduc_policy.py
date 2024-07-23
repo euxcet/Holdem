@@ -71,7 +71,7 @@ class PPORangeLeducPolicy(PPOPokerPolicy):
         return self.model(obs)[0].detach().cpu().numpy()
 
     def _policy_to_prob(self, policy: np.ndarray, action_mask: np.ndarray) -> np.ndarray:
-        action_prob = policy.reshape((12, 2))[:, 0].copy() # discard vars
+        action_prob = policy.squeeze()[:12].copy() # discard vars
         for i in range(3):
             if sum(action_prob[i * 4 : (i + 1) * 4] * action_mask) < 1e-5:
                 action_prob[i * 4 : (i + 1) * 4] = action_mask.astype(np.float32)

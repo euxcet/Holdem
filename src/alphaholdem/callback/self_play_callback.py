@@ -71,7 +71,7 @@ class SelfPlayCallback(DefaultCallbacks, ABC):
         ...
 
     def calc_metric(self, result: dict, policy: Policy) -> None:
-        main_reward = result["hist_stats"].pop("policy_learned_reward")
+        main_reward = result["hist_stats"]["policy_learned_reward"]
         win_rate = sum(main_reward) / len(main_reward) * 50.0 * self.payoff_max
         self.win_rate_window.push(win_rate)
         result["win_rate"] = win_rate
@@ -84,6 +84,11 @@ class SelfPlayCallback(DefaultCallbacks, ABC):
             )
             result['win_rate_vs_nash'] = mean
             result['win_rate_vs_nash_var'] = var
+        # if win_rate > 0:
+        #     print(main_reward)
+        #     print('win_rate', sum(main_reward) / len(main_reward) * 50 * self.payoff_max)
+        #     print(result['hist_stats'])
+        #     exit(0)
 
     def log_result(self, algorithm: Algorithm, result: dict, policy: Policy) -> None:
         log.info(f"Iter={algorithm.iteration} win_rate={result['win_rate']}")

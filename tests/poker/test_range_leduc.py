@@ -36,7 +36,7 @@ class TestRangeLeduc():
             path='/home/clouduser/zcc/Holdem/strategy/bug.txt',
         )
         tot = 0
-        l = 10000
+        l = 10
         for i in range(l):
             env.reset()
             while not env.is_over():
@@ -46,5 +46,7 @@ class TestRangeLeduc():
                 else:
                     action = random_policy._do_compute_actions(obs)[0][0]
                 env.step(action)
+            print(env._cumulative_rewards['agent_' + str(i % 2)], end = ' ')
             tot += env._cumulative_rewards['agent_' + str(i % 2)]
+        print()
         print(tot / l * 50 * payoff_max)

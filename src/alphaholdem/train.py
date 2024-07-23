@@ -36,6 +36,7 @@ def main():
     initial_policies.update({learned_policy: PolicySpec()})
 
     def select_policy(agent_id: str, episode: EpisodeV2, **kwargs):
+        # return random.choice(cfg.self_play.rule_based_policies)
         if len(cfg.self_play.rule_based_policies) == 0:
             return learned_policy
         return (learned_policy if episode.episode_id % 2 == int(agent_id[-1:])

@@ -83,11 +83,6 @@ class PokerGameEnv(AECEnv):
                 self.terminations = self._to_dict([True] * self.num_agents)
                 self.truncations = self._to_dict([False] * self.num_agents)
                 
-        # if not self.game.is_over() and action is None:
-        #     self.rewards = self._to_dict([
-        #         (0.1 if i == self._agent_name_to_id(self.agent_selection) else 0)
-        #             for i in range(self.num_agents)
-        #     ])
         self.agent_selection = self._agent_id_to_name(self._game_id_to_agent_id(observation.current_player))
         self._accumulate_rewards()
         return self
