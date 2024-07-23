@@ -5,7 +5,7 @@ from alphaholdem.arena.policy.kuhn.ppo_kuhn_policy import PPOKuhnPolicy
 from alphaholdem.arena.leduc_arena import LeducArena
 from alphaholdem.arena.policy.leduc.lookup_leduc_policy import LookupLeducPolicy
 
-class TestTexasPolicy():
+class TestTexasArena():
     SKIP = True
 
     run_folder = '/home/clouduser/ray_results/PPO_2024-07-09_05-51-05'

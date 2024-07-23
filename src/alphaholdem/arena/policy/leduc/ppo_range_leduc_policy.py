@@ -12,7 +12,7 @@ class PPORangeLeducPolicy(PPOPokerPolicy):
     @override
     def get_range_policy(self, env_obs: dict, game_obs: Observation) -> np.ndarray:
         env_obs_list = []
-        for hole_card in Card.from_str_list(['Js', 'Jh', 'Qs', 'Qh', 'Ks', 'Kh']):
+        for hole_card in Card.from_str_list(['Js', 'Js', 'Qs', 'Qs', 'Ks', 'Ks']):
             obs = deepcopy(env_obs)
             obs['observation'][0] = np.zeros((4, 13))
             obs['observation'][0][hole_card.suit][hole_card.rank] = 1.0
@@ -88,7 +88,7 @@ class PPORangeLeducPolicy(PPOPokerPolicy):
         for id, key in enumerate(keys):
             player, action_history, action_mask, board_card = self._create_observation(key)
             range_key = '?' + key[1:]
-            ranges = all_ranges[range_key] # remove the hole card and the colon
+            ranges = all_ranges[range_key] # remove the hole card
             prob = self._policy_to_prob(self.get_policy({
                 'ranges': ranges,
                 'action_history': action_history,
@@ -113,7 +113,7 @@ class PPORangeLeducPolicy(PPOPokerPolicy):
                     for board_card in ['J', 'Q', 'K']:
                         check_key = range_key[0] + board_card + range_key[1:-1] + 'c/:'
                         all_ranges[check_key] = check_ranges
-                elif range_key[-2] != 'c':
+                elif range_key[-2] != 'c': # first check in the street
                     check_key = range_key[:-1] + 'c:'
                     check_ranges[player][0] *= prob[1] # J
                     check_ranges[player][1] *= prob[5] # Q
@@ -136,15 +136,10 @@ class PPORangeLeducPolicy(PPOPokerPolicy):
                 raise_ranges[player][1] *= prob[7] # Q
                 raise_ranges[player][2] *= prob[11] # K
                 all_ranges[raise_key] = raise_ranges
-            # print(key, range_key)
-            # print(prob)
-            # print(action_mask)
-            # print(all_ranges)
-            # print()
-            # print()
-
-        # print(strategy)
-        # exit(0)
+            
+        # f = open('strategy/bug.txt', 'w')
+        # for i in range(len(keys)):
+        #     f.write('{} {} {} {}\n'.format(keys[i], strategy[i][0], strategy[i][1], strategy[i][2]))
         return strategy
 
 

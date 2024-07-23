@@ -1,3 +1,4 @@
+import numpy as np
 from copy import deepcopy
 from numpy.random import Generator
 from .range_poker_game import RangePokerGame
@@ -42,7 +43,7 @@ class RangeLimitLeducHoldem(RangePokerGame):
         self.judger = RangeLeducJudger()
     
     def reset(self, seed: int = None, rng: Generator = None) -> Observation:
-        self.players_range = [[1.0, 1.0, 1.0] for i in range(self.num_players)]
+        self.player_range = [[1.0, 1.0, 1.0] for i in range(self.num_players)]
         return super().reset()
 
     def observe(self, player: int) -> Observation:
@@ -61,8 +62,29 @@ class RangeLimitLeducHoldem(RangePokerGame):
             legal_actions = self.get_legal_action(player),
             log_action = deepcopy(self.log_action),
             is_over = self.is_over(),
-            players_range=self.players_range,
+            player_range=self.player_range,
         )
+
+    def step(self, action: np.ndarray) -> Observation:
+        action_prob = action.copy()
+        legal_actions = self.get_legal_action(self.current_player)
+        action_mask = np.array([
+            0 if legal_actions[i] is None else 1
+            for i in range(4)
+        ])
+        for i in range(3):
+            if sum(action_prob[i * 4 : (i + 1) * 4] * action_mask) < 1e-5:
+                action_prob[i * 4 : (i + 1) * 4] = action_mask.astype(np.float32)
+            s = sum(action_prob[i * 4 : (i + 1) * 4] * action_mask)
+            action_prob[i * 4 : (i + 1) * 4] *= action_mask.astype(np.float32) / s
+        prob = np.zeros(4)
+        for i in range(12):
+            prob[i % 4] += action_prob[i]
+        prob /= np.sum(prob)
+        sample = np.random.choice(self.action_shape, p=prob)
+        for i in range(3):
+            self.player_range[self.current_player][i] *= action_prob[i * 4 + sample]
+        return super().step(legal_actions[sample])
 
     def _calculate_payoff(self) -> list[float]:
         return self.judger.judge(
@@ -70,6 +92,7 @@ class RangeLimitLeducHoldem(RangePokerGame):
             board_cards = self.board_cards,
             player_fold = self.player_fold,
             player_bet = self.player_bet,
+            player_range = self.player_range
         )
     
     def get_legal_action(self, player: int) -> list[Action]:

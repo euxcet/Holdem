@@ -50,10 +50,10 @@ self_play:
   type: naive
   arena: leduc
   policy_type: leduc
-  rule_based_policies: []
+  rule_based_policies: [leduc_cfr]
   num_opponent_limit: 100
   num_update_iter: 10000000
-  arena_runs: 2048
+  arena_runs: 8192
 
 policy:
   alphaholdem: /home/clouduser/zcc/Holdem/checkpoint/38000_model/model.ckpt

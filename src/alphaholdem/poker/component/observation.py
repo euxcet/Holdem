@@ -20,7 +20,7 @@ class Observation():
         legal_actions: list[Action],
         log_action: list[Action],
         is_over: bool,
-        players_range: list[list[float]] = None,
+        player_range: list[list[float]] = None,
     ) -> None:
         self.player = player
         self.num_players = num_players
@@ -37,7 +37,7 @@ class Observation():
         self.log_action = log_action
         self.player_name = get_players_name(num_players=num_players)
         self.is_over = is_over
-        self.players_range = players_range
+        self.player_range = player_range
 
     def __str__(self) -> str:
         return f'player={self.player_name[self.player]} pot={self.pot / 2}BB chips={self.chips / 2}BB ' + \

@@ -14,35 +14,77 @@ class RangeLeducJudger(Judger):
         board_cards: list[Card],
         player_bet: list[int],
         player_fold: list[bool],
+        player_range: list[list[float]],
     ) -> list[int]:
         payoff: list[int] = [0, 0]
-        if player_fold.count(False) == 1:
-            payoff = [-player_bet[0], -player_bet[1]]
-            winner = player_fold.index(False)
-            payoff[winner] += pot
-            return payoff
+        # print('Judge')
+        # print(pot, board_cards, player_bet, player_range)
 
         # JQ 1/10 # JK 1/10 # QJ 1/10 # QQ 1/10
         # QK 1/5 # KJ 1/10 # KQ 1/5 # KK 1/10
+        # optimize
+        # for player0_card in Card.from_str_list(['Jc', 'Qc', 'Kc']):
+        #     for player1_card in Card.from_str_list(['Jc', 'Qc', 'Kc']):
+        #         if len(board_cards) > 0:
+        #             if player0_card == player1_card and player0_card == board_cards[0]:
+        #                 continue
+        #             elif player0_card == player1_card or player0_card == board_cards[0] or player1_card == board_cards[0]:
+        #                 prob = 1 / 10
+        #             else:
+        #                 prob = 1 / 5
+        #         else:
+        #             if player0_card == player1_card:
+        #                 prob = 1 / 15
+        #             else:
+        #                 prob = 2 / 15
+
+        #         player_best_hand =[
+        #             self.get_best_hand([player0_card], board_cards),
+        #             self.get_best_hand([player1_card], board_cards),
+        #         ]
+        #         if player_fold[0]: # player0 fold
+        #             this_payoff = [-player_bet[0], player_bet[0]]
+        #         elif player_fold[1]: # player1 fold
+        #             this_payoff = [player_bet[1], -player_bet[1]]
+        #         elif player_best_hand[0] > player_best_hand[1]: # player0 win
+        #             this_payoff = [pot // 2, -pot // 2]
+        #         elif player_best_hand[0] < player_best_hand[1]: # player1 win
+        #             this_payoff = [-pot // 2, pot // 2]
+        #         else: # chop
+        #             this_payoff = [0, 0]
+        #         range_prob = player_range[0][player0_card.rank - 9] * player_range[1][player1_card.rank - 9]
+        #         payoff[0] += this_payoff[0] * prob * range_prob
+        #         payoff[1] += this_payoff[1] * prob * range_prob
+
+        sum_p0 = sum(player_range[0])
+        sum_p1 = sum(player_range[1])
+        if sum_p0 < 1e-5 or sum_p1 < 1e-5:
+            return payoff
+
         for player0_card in Card.from_str_list(['Jc', 'Qc', 'Kc']):
             for player1_card in Card.from_str_list(['Jc', 'Qc', 'Kc']):
-                if player0_card == player1_card and player0_card == board_cards[0]:
-                    prob = 0
-                elif player0_card == player1_card or player0_card == board_cards[0] or player1_card == board_cards[0]:
-                    prob = 1 / 10
-                else:
-                    prob = 1 / 5
-
                 player_best_hand =[
                     self.get_best_hand([player0_card], board_cards),
                     self.get_best_hand([player1_card], board_cards),
                 ]
-                if player_best_hand[0] > player_best_hand[1]:
+                if player_fold[0]: # player0 fold
+                    this_payoff = [-player_bet[0], player_bet[0]]
+                elif player_fold[1]: # player1 fold
+                    this_payoff = [player_bet[1], -player_bet[1]]
+                elif player_best_hand[0] > player_best_hand[1]: # player0 win
                     this_payoff = [pot // 2, -pot // 2]
-                elif player_best_hand[0] < player_best_hand[1]:
+                elif player_best_hand[0] < player_best_hand[1]: # player1 win
                     this_payoff = [-pot // 2, pot // 2]
-                else:
+                else: # chop
                     this_payoff = [0, 0]
+
+                sum_p1 = sum(player_range[1]) - player_range[1][player0_card.rank - 9] / 2
+                prob = player_range[0][player0_card.rank - 9] / sum_p0
+                if player0_card == player1_card:
+                    prob *= player_range[1][player1_card.rank - 9] / 2 / sum_p1
+                else:
+                    prob *= player_range[1][player1_card.rank - 9] / sum_p1
+
                 payoff[0] += this_payoff[0] * prob
                 payoff[1] += this_payoff[1] * prob
         return payoff

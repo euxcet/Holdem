@@ -69,24 +69,26 @@ class RangeLimitLeducHoldemEnv(RangePokerGameEnv):
         if action is None:
             super().step(None)
         else:
-            action_prob = action.copy()
-            action_mask = np.array([
-                0 if self.last_observation.legal_actions[i] is None else 1
-                for i in range(4)
-            ])
-            for i in range(3):
-                if sum(action_prob[i * 4 : (i + 1) * 4] * action_mask) < 1e-5:
-                    action_prob[i * 4 : (i + 1) * 4] = action_mask.astype(np.float32)
-                s = sum(action_prob[i * 4 : (i + 1) * 4] * action_mask)
-                action_prob[i * 4 : (i + 1) * 4] *= action_mask.astype(np.float32) / s
-            prob = np.zeros(4)
-            for i in range(12):
-                prob[i % 4] += action_prob[i]
-            prob /= np.sum(prob)
-            sample = np.random.choice(self.game.action_shape, p=prob)
-            for i in range(3):
-                self.game.players_range[self.game.current_player][i] *= action_prob[i * 4 + sample]
-            super().step(self.last_observation.legal_actions[sample])
+            super().step(action)
+
+            # action_prob = action.copy()
+            # action_mask = np.array([
+            #     0 if self.last_observation.legal_actions[i] is None else 1
+            #     for i in range(4)
+            # ])
+            # for i in range(3):
+            #     if sum(action_prob[i * 4 : (i + 1) * 4] * action_mask) < 1e-5:
+            #         action_prob[i * 4 : (i + 1) * 4] = action_mask.astype(np.float32)
+            #     s = sum(action_prob[i * 4 : (i + 1) * 4] * action_mask)
+            #     action_prob[i * 4 : (i + 1) * 4] *= action_mask.astype(np.float32) / s
+            # prob = np.zeros(4)
+            # for i in range(12):
+            #     prob[i % 4] += action_prob[i]
+            # prob /= np.sum(prob)
+            # sample = np.random.choice(self.game.action_shape, p=prob)
+            # for i in range(3):
+            #     self.game.player_range[self.game.current_player][i] *= action_prob[i * 4 + sample]
+            # super().step(self.last_observation.legal_actions[sample])
 
     def observe_current(self) -> dict:
         return self.observe(self.agent_selection)
@@ -96,7 +98,7 @@ class RangeLimitLeducHoldemEnv(RangePokerGameEnv):
         board_card = np.zeros((3,)).astype(np.float32)
         if len(observation.board_cards) > 0:
             board_card[observation.board_cards[0].rank - 9] = 1.0
-        ranges = np.array(observation.players_range).astype(np.float32)
+        ranges = np.array(observation.player_range).astype(np.float32)
         # street, player, num_actions_street, action
         action_history = np.zeros((2, self.num_players * self.max_num_actions_street, 5), np.float32)
         action_street_count = [[0 for i in range(4)] for j in range(self.num_players)]

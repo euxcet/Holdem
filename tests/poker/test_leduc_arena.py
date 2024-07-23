@@ -7,13 +7,14 @@ from alphaholdem.arena.policy.leduc.ppo_range_leduc_policy import PPORangeLeducP
 from alphaholdem.arena.policy.leduc.lookup_leduc_policy import LookupLeducPolicy
 from alphaholdem.arena.leduc_arena import LeducArena
 
-class TestLeducPolicy():
+class TestLeducArena():
     SKIP = True
     # run_folder = '/home/clouduser/ray_results/PPO_2024-05-18_15-09-37'
-    cfr = LookupLeducPolicy('strategy/leduc.txt')
+    cfr = LookupLeducPolicy('strategy/leduc_nash.txt')
 
+    @pytest.mark.skipif(SKIP, reason="SKIP == True")
     def test_range_policy(self):
-        ppos = PPORangeLeducPolicy.load_policies_from_run('/home/clouduser/ray_results/PPO_2024-07-17_06-18-22')
+        ppos = PPORangeLeducPolicy.load_policies_from_run('/home/clouduser/ray_results/PPO_2024-07-22_14-40-47')
         mean, var = LeducArena('/home/clouduser/zcc/Holdem/strategy/leduc_nash.txt').policy_vs_policy(
             policy0=LookupLeducPolicy('/home/clouduser/zcc/Holdem/strategy/leduc_nash.txt'),
             policy1=ppos[-1],
