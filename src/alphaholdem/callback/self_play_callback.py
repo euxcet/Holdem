@@ -41,14 +41,15 @@ class SelfPlayCallback(DefaultCallbacks, ABC):
         return self.OPPONENT_PREFIX + str(id)
 
     def select_policy(self, agent_id: str, episode: EpisodeV2, **kwargs) -> str:
-        if episode.episode_id % 2 == int(agent_id.split('_')[-1]):
-            return self.POLICY_TO_LEARN
-        return np.random.choice(self.rule_based_policies)
-        # if self.opponent_policies.capacity() == 0:
-        #     return self.POLICY_TO_LEARN
         # if episode.episode_id % 2 == int(agent_id.split('_')[-1]):
         #     return self.POLICY_TO_LEARN
-        # return np.random.choice(self.opponent_policies.window)
+        # return np.random.choice(self.rule_based_policies)
+
+        if self.opponent_policies.capacity() == 0:
+            return self.POLICY_TO_LEARN
+        if episode.episode_id % 2 == int(agent_id.split('_')[-1]):
+            return self.POLICY_TO_LEARN
+        return np.random.choice(self.opponent_policies.window)
 
     def add_policy(self, algorithm: Algorithm) -> None:
         policy_id = self._get_policy_id(self.opponent_policies.capacity())
@@ -72,10 +73,13 @@ class SelfPlayCallback(DefaultCallbacks, ABC):
 
     def calc_metric(self, result: dict, policy: Policy) -> None:
         main_reward = result["hist_stats"]["policy_learned_reward"]
+        print(type(main_reward))
+        print('Isnan', any(np.isnan(main_reward)), main_reward[:10])
         win_rate = sum(main_reward) / len(main_reward) * 50.0 * self.payoff_max
         self.win_rate_window.push(win_rate)
         result["win_rate"] = win_rate
         result["win_rate_smooth"] = self.win_rate_window.average()
+
         if self.arena.nash_policy is not None:
             mean, var = self.arena.policy_vs_policy(
                 policy0=self.current_policy,
@@ -84,11 +88,6 @@ class SelfPlayCallback(DefaultCallbacks, ABC):
             )
             result['win_rate_vs_nash'] = mean
             result['win_rate_vs_nash_var'] = var
-        # if win_rate > 0:
-        #     print(main_reward)
-        #     print('win_rate', sum(main_reward) / len(main_reward) * 50 * self.payoff_max)
-        #     print(result['hist_stats'])
-        #     exit(0)
 
     def log_result(self, algorithm: Algorithm, result: dict, policy: Policy) -> None:
         log.info(f"Iter={algorithm.iteration} win_rate={result['win_rate']}")

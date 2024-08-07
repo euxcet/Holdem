@@ -61,12 +61,13 @@ class PPORangeKuhnPolicy(PPOPokerPolicy):
         result = self.get_policies([self._create_env_obs(obs[0], obs[1]) for obs in observations], None)
         strategy = np.zeros((12, 2)).astype(np.float32)
         for i in range(12):
-            result[i][0] = max(0, min(result[i][0], 1))
-            strategy[i] = [result[i][0], 1.0 - result[i][0]]
+            card = Card.from_str(observations[i][0] + 's').rank - 9
+            result[i][card] = max(0, min(result[i][card], 1))
+            strategy[i] = [result[i][card], 1.0 - result[i][card]]
         return strategy
 
     def log(self):
-        result = self.get_range_policy()
+        result = self.get_all_policy()
         for i in range(result.shape[0]):
             for j in range(result[i].shape[0]):
                 print(round(result[i][j], 3), end = ' ')

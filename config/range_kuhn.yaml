@@ -5,7 +5,7 @@ game:
   legal_raise_pot_size: []
   num_runs: 1
   initial_chips: 4
-  payoff_max: 2
+  payoff_max: 0.5
   circular_train: false
   custom_board_cards: null
   num_action: 4
@@ -28,13 +28,13 @@ rllib:
 
 hyper:
   model: range_kuhn
-  learning_rate: 0.00005
+  learning_rate: 0.0002
   clip_param: 0.2
   entropy_coeff: 0.01
-  train_batch_size: 1024
+  train_batch_size: 8192
   sgd_minibatch_size: 128
   num_sgd_iter: 30
-  kl_coeff: 0.2
+  kl_coeff: 0.0
   kl_target: 0.003
   vf_clip_param: 10.0
   vf_loss_coeff: 1.0
@@ -49,9 +49,10 @@ self_play:
   type: naive
   arena: kuhn
   policy_type: range_kuhn
+  # rule_based_policies: ['range_kuhn_cfr']
   rule_based_policies: []
   num_opponent_limit: 1
-  num_update_iter: 5000
+  num_update_iter: 500000
   arena_runs: 16384
 
 policy:

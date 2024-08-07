@@ -7,14 +7,14 @@ class RangeKuhnModel(TorchModelV2, nn.Module):
         TorchModelV2.__init__(self, obs_space, act_space, num_outputs, *args, **kwargs)
         nn.Module.__init__(self)
         self.policy_fn = nn.Sequential(
-            nn.Linear(11, 256),
+            nn.Linear(8, 256),
             nn.ReLU(),
             nn.Linear(256, 32),
             nn.ReLU(),
-            nn.Linear(32, 2),
+            nn.Linear(32, num_outputs),
         )
         self.value_fn = nn.Sequential(
-            nn.Linear(11, 256),
+            nn.Linear(8, 256),
             nn.ReLU(),
             nn.Linear(256, 32),
             nn.ReLU(),
@@ -22,13 +22,11 @@ class RangeKuhnModel(TorchModelV2, nn.Module):
         )
 
     def forward(self, input_dict, state, seq_lens):
-        # 3
-        card_out = input_dict['obs']['observation'].flatten(start_dim=1)
         # 2 * 4
-        action_out = input_dict['obs']['action_history'].flatten(start_dim=1)
-        out = torch.cat((card_out, action_out), dim=1)
+        out = input_dict['obs']['action_history'].flatten(start_dim=1)
         policy = self.policy_fn(out)
         self._value_out = self.value_fn(out)
+        policy[:, :3] = torch.sigmoid(policy[:, :3])
         return policy, state
 
     def value_function(self):

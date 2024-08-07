@@ -86,6 +86,7 @@ class PPORangeLeducPolicy(PPOPokerPolicy):
         }
         strategy = np.zeros((len(keys), 3)).astype(np.float32)
         for id, key in enumerate(keys):
+# JJ:/crrc/r: 0.9919999837875366 0.00800000037997961 0.0
             player, action_history, action_mask, board_card = self._create_observation(key)
             range_key = '?' + key[1:]
             ranges = all_ranges[range_key] # remove the hole card
@@ -100,9 +101,13 @@ class PPORangeLeducPolicy(PPOPokerPolicy):
             #  8 K_fold  9 K_check 10 K_call 11 K_raise
 
             offset = (Card.from_str(key[0] + 's').rank - 9) * 4
-            strategy[id][0] = prob[offset + 3]
-            strategy[id][1] = prob[offset + 1] + prob[offset + 2]
-            strategy[id][2] = prob[offset + 0]
+            strategy[id][0] = round(prob[offset + 3], 3)
+            strategy[id][1] = round(prob[offset + 1] + prob[offset + 2], 3)
+            strategy[id][2] = round(prob[offset + 0], 3)
+
+            # if key in ['JJ:/crrc/r:', 'JJ:/rc/r:']:
+            #     print(key, player, action_history, action_mask, board_card)
+            #     print(prob, strategy[id])
 
             if action_mask[1] == 1: # check
                 check_ranges = ranges.copy()
@@ -137,9 +142,10 @@ class PPORangeLeducPolicy(PPOPokerPolicy):
                 raise_ranges[player][2] *= prob[11] # K
                 all_ranges[raise_key] = raise_ranges
             
-        # f = open('strategy/bug.txt', 'w')
-        # for i in range(len(keys)):
-        #     f.write('{} {} {} {}\n'.format(keys[i], strategy[i][0], strategy[i][1], strategy[i][2]))
+        f = open('/home/clouduser/zcc/Holdem/strategy/leduc_ppo.txt', 'w')
+        for i in range(len(keys)):
+            f.write('{} {} {} {}\n'.format(keys[i], strategy[i][0], strategy[i][1], strategy[i][2]))
+
         return strategy
 
 

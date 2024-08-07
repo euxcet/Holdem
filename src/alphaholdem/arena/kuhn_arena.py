@@ -43,5 +43,7 @@ class KuhnArena(Arena):
             policy0 = self._to_lookup_policy(policy0.get_all_policy())
         if type(policy1) in [PPOKuhnPolicy, PPORangeKuhnPolicy]:
             policy1 = self._to_lookup_policy(policy1.get_all_policy())
-        return (KuhnTree([policy0.policy, policy1.policy]).dfs_ev()
-                - KuhnTree([policy1.policy, policy0.policy]).dfs_ev()) / 2 * 100, 0
+        ev0 = KuhnTree([policy0.policy, policy1.policy]).dfs_ev() * 50
+        ev1 = -KuhnTree([policy1.policy, policy0.policy]).dfs_ev() * 50
+        print(ev0, ev1)
+        return (ev0 + ev1) / 2, 0

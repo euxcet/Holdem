@@ -15,7 +15,7 @@ class TestRangeLeduc():
             'board_card': [obs['board_card']],
         }
 
-    # @pytest.mark.skipif(SKIP, reason="SKIP == True")
+    @pytest.mark.skipif(SKIP, reason="SKIP == True")
     def test_range_leduc(self):
         payoff_max = 10
         env = RangeLimitLeducHoldemEnv(payoff_max=payoff_max)

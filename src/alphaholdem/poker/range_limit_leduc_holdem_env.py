@@ -26,7 +26,7 @@ class RangeLimitLeducHoldemEnv(RangePokerGameEnv):
         showdown_street: Street = Street.Turn,
         custom_board_cards: list[Card] = None,
         circular_train: bool = False,
-        payoff_max: float = 200,
+        payoff_max: float = 15,
     ) -> None:
         game = RangeLimitLeducHoldem(
             num_players=num_players,
@@ -66,11 +66,10 @@ class RangeLimitLeducHoldemEnv(RangePokerGameEnv):
         ])
 
     def step(self, action: np.ndarray | None) -> None:
-        obs = self.observe_current()
-        if action is None:
-            super().step(None)
-        else:
-            super().step(action)
+        # obs = self.observe_current()
+        # print(action)
+        # print(obs['board_card'], obs['action_mask'], obs['action_history'])
+        super().step(action)
 
     def observe_current(self) -> dict:
         return self.observe(self.agent_selection)

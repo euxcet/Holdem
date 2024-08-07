@@ -44,7 +44,8 @@ class RangeLimitLeducHoldem(RangePokerGame):
     
     def reset(self, seed: int = None, rng: Generator = None) -> Observation:
         self.player_range = [[1.0, 1.0, 1.0] for i in range(self.num_players)]
-        return super().reset()
+        self.factor = 1.0
+        return super().reset(seed, rng)
 
     def observe(self, player: int) -> Observation:
         return Observation(
@@ -68,7 +69,10 @@ class RangeLimitLeducHoldem(RangePokerGame):
     def step(self, action: np.ndarray) -> Observation:
         action = action.clip(0, 1)
         action_prob = action.copy()
-        legal_actions = self.get_legal_action(self.current_player)
+        # for i in range(12):
+        #     action_prob[i] += 1e-5
+        legal_actions = list(self.get_legal_action(self.current_player))
+
         action_mask = np.array([
             0 if legal_actions[i] is None else 1
             for i in range(4)
@@ -78,15 +82,37 @@ class RangeLimitLeducHoldem(RangePokerGame):
                 action_prob[i * 4 : (i + 1) * 4] = action_mask
             s = sum(action_prob[i * 4 : (i + 1) * 4] * action_mask)
             action_prob[i * 4 : (i + 1) * 4] *= action_mask / s
-        prob = np.zeros(4)
-        for i in range(12):
-            prob[i % 4] += action_prob[i]
-        prob /= np.sum(prob)
-        sample = np.random.choice(self.action_shape, p=prob)
-        sample = np.random.choice(self.action_shape, p=prob)
-        for i in range(3):
-            self.player_range[self.current_player][i] *= action_prob[i * 4 + sample]
-        return super().step(legal_actions[sample])
+        # print(action_prob)
+
+        # prob = np.zeros(4)
+        # for i in range(12):
+        #     prob[i % 4] += self.player_range[self.current_player][i // 4] * action_prob[i]
+        # prob /= np.sum(prob)
+        # sample = np.random.choice(self.action_shape, p=prob)
+
+        num_actions = 0
+        for i in range(4):
+            if legal_actions[i] is not None:
+                num_actions += 1
+            # elif i != 0:
+            #     for j in range(3):
+            #         action_prob[j * 4] += action_prob[j * 4 + i]
+            #         action_prob[j * 4 + i] = 0
+        self.factor *= num_actions
+
+        sample = np.random.randint(0, num_actions)
+
+        s = [sum(action_prob[0:4]), sum(action_prob[4:8]), sum(action_prob[8:12])]
+
+        for i in range(4):
+            if legal_actions[i] is not None:
+                if sample == 0:
+                    for j in range(3):
+                        self.player_range[self.current_player][j] *= action_prob[j * 4 + i] / s[j]
+                    return super().step(legal_actions[i])
+                else:
+                    sample -= 1
+
 
     def _calculate_payoff(self) -> list[float]:
         return self.judger.judge(
@@ -94,7 +120,8 @@ class RangeLimitLeducHoldem(RangePokerGame):
             board_cards = self.board_cards,
             player_fold = self.player_fold,
             player_bet = self.player_bet,
-            player_range = self.player_range
+            player_range = self.player_range,
+            factor = self.factor,
         )
     
     def get_legal_action(self, player: int) -> list[Action]:

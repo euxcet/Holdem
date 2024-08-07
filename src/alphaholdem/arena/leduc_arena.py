@@ -38,5 +38,7 @@ class LeducArena():
             policy0 = self._to_lookup_policy(policy0.get_all_policy(self.keys))
         if type(policy1) in [PPOLeducPolicy, PPORangeLeducPolicy]:
             policy1 = self._to_lookup_policy(policy1.get_all_policy(self.keys))
+        # print('policy', policy0.policy['J:/:'], policy0.policy['Q:/:'], policy0.policy['K:/:'])
+        # print('nash  ', policy1.policy['J:/:'], policy1.policy['Q:/:'], policy1.policy['K:/:'])
         return (LeducTree([policy0.policy, policy1.policy]).dfs_ev()
-                - LeducTree([policy1.policy, policy0.policy]).dfs_ev()) / 2 * 100, 0
+                - LeducTree([policy1.policy, policy0.policy]).dfs_ev()) / 2 * 50, 0

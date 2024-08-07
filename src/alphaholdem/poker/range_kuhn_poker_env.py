@@ -44,19 +44,12 @@ class RangeKuhnPokerEnv(RangePokerGameEnv):
         ])
         # Fold Check Call Raise
         self.action_spaces = self._to_dict([
-            spaces.Box(low=0.0, high=1, shape=(1,), dtype=np.float32)
+            spaces.Box(low=-1, high=1, shape=(3,), dtype=np.float32)
                 for _ in range(self.num_agents)
         ])
 
-    def step(self, action: list[float]) -> None:
-        if action is None:
-            super().step(None)
-        else:
-            actions = list(filter(lambda x: x is not None, self.last_observation.legal_actions))
-            if np.random.random() < action[0]:
-                super().step(actions[0])
-            else:
-                super().step(actions[1])
+    def step(self, action: np.ndarray | None) -> None:
+        super().step(action)
 
     def observe_current(self) -> dict:
         return self.observe(self.agent_selection)

@@ -15,14 +15,17 @@ class RangeLeducJudger(Judger):
         player_bet: list[int],
         player_fold: list[bool],
         player_range: list[list[float]],
+        factor: float,
     ) -> list[int]:
         payoff: list[int] = [0, 0]
+        # return payoff
 
-        sum_p0 = sum(player_range[0])
-        sum_p1 = sum(player_range[1])
-        if sum_p0 < 1e-5 or sum_p1 < 1e-5:
-            return payoff
+        # sum_p0 = sum(player_range[0])
+        # sum_p1 = sum(player_range[1])
+        # if sum_p0 < 1e-5 or sum_p1 < 1e-5:
+        #     return payoff
 
+        # tot = 0
         for player0_card in Card.from_str_list(['Jc', 'Qc', 'Kc']):
             for player1_card in Card.from_str_list(['Jc', 'Qc', 'Kc']):
                 player_best_hand =[
@@ -40,17 +43,27 @@ class RangeLeducJudger(Judger):
                 else: # chop
                     this_payoff = [0, 0]
 
-                sum_p1 = sum(player_range[1]) - player_range[1][player0_card.rank - 9] / 2
-                prob = player_range[0][player0_card.rank - 9] / sum_p0
+                # sum_p1 = sum(player_range[1]) - player_range[1][player0_card.rank - 9] / 2
+                # prob = player_range[0][player0_card.rank - 9] / sum_p0
+                # if player0_card == player1_card:
+                #     prob *= player_range[1][player1_card.rank - 9] / 2 / sum_p1
+                # else:
+                #     prob *= player_range[1][player1_card.rank - 9] / sum_p1
+                # prob *= player_range[1][player1_card.rank - 9]
+                # prob = player_range[0][player0_card.rank - 9] * player_range[1][player1_card.rank - 9] / 6
+                # tot += prob
                 if player0_card == player1_card:
-                    prob *= player_range[1][player1_card.rank - 9] / 2 / sum_p1
+                    prob = player_range[0][player0_card.rank - 9] * player_range[1][player1_card.rank - 9] / 2 / 7.5
                 else:
-                    prob *= player_range[1][player1_card.rank - 9] / sum_p1
+                    prob = player_range[0][player0_card.rank - 9] * player_range[1][player1_card.rank - 9] / 7.5
+                # tot += prob
 
-                payoff[0] += this_payoff[0] * prob
-                payoff[1] += this_payoff[1] * prob
-        # print(pot, board_cards, player_bet, player_fold, player_range, payoff)
+                payoff[0] += this_payoff[0] * prob * factor
+                payoff[1] += this_payoff[1] * prob * factor
         return payoff
+        # print(pot, board_cards, player_bet, player_fold, player_range, payoff)
+        # return [payoff[0] / tot, payoff[1] / tot]
+        # return payoff
 
     # TODO: to be optimized
     def choose(

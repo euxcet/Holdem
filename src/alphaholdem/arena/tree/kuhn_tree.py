@@ -7,6 +7,7 @@ class KuhnNode():
         son: list[KuhnNode],
         action_history: str,
         action_prob: list[float],
+        hole_cards: str,
         is_terminal: bool,
         payoff: list[float] = [0, 0],
     ) -> None:
@@ -15,10 +16,12 @@ class KuhnNode():
         self.action_history = action_history
         self.action_prob = action_prob
         self.is_terminal = is_terminal
+        self.hole_cards = hole_cards
         self.payoff = payoff
     
     def dfs_ev(self, reach_prob: float) -> float:
         if self.is_terminal:
+            # print(self.hole_cards, self.action_history, reach_prob, self.payoff)
             return reach_prob * self.payoff[0]
         payoff = 0.0
         for i, child in enumerate(self.son):
@@ -27,8 +30,8 @@ class KuhnNode():
 
 class KuhnTree():
     def __init__(self, strategy: list[dict]):
-        self.root = self.create_root(strategy)
         self.mapping = {'J': 0, 'Q': 1, 'K': 2}
+        self.root = self.create_root(strategy)
 
     def dfs_ev(self) -> float:
         return self.root.dfs_ev(reach_prob=1.0)
@@ -59,7 +62,7 @@ class KuhnTree():
         strategy: list[dict],
         player: int,
         hole_cards: str,
-        action_history: str
+        action_history: str,
     ) -> KuhnNode:
         if action_history in ['cc', 'crf', 'crc', 'rf', 'rc']:
             showdown = 1 if self.mapping[hole_cards[0]] > self.mapping[hole_cards[1]] else -1
@@ -76,6 +79,7 @@ class KuhnTree():
                 action_history=action_history,
                 action_prob=[],
                 is_terminal=True,
+                hole_cards=hole_cards,
                 payoff=payoff,
             )
 
@@ -99,5 +103,6 @@ class KuhnTree():
             action_history=action_history,
             action_prob=action_prob,
             is_terminal=False,
+            hole_cards=hole_cards,
             payoff=[],
         )

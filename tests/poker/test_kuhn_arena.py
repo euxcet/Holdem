@@ -8,13 +8,13 @@ from alphaholdem.arena.policy.leduc.lookup_leduc_policy import LookupLeducPolicy
 class TestTexasArena():
     SKIP = True
 
-    @pytest.mark.skipif(SKIP, reason="SKIP == True")
+    # @pytest.mark.skipif(SKIP, reason="SKIP == True")
     def test_cfr(self):
-        run_folder = '/home/clouduser/ray_results/PPO_2024-07-09_05-51-05'
-        ppos = PPOKuhnPolicy.load_policies_from_run(run_folder)
+        # run_folder = '/home/clouduser/ray_results/PPO_2024-07-09_05-51-05'
+        # ppos = PPOKuhnPolicy.load_policies_from_run(run_folder)
         mean, var = KuhnArena('/home/clouduser/zcc/Holdem/strategy/kuhn_nash.txt').policy_vs_policy(
-            policy0=LookupLeducPolicy('/home/clouduser/zcc/Holdem/strategy/kuhn_nash.txt'),
-            policy1=LookupLeducPolicy('/home/clouduser/zcc/Holdem/strategy/kuhn_nash.txt'),
+            policy0=LookupKuhnPolicy('/home/clouduser/zcc/Holdem/strategy/kuhn_nash.txt'),
+            policy1=LookupKuhnPolicy('/home/clouduser/zcc/Holdem/strategy/kuhn_best.txt'),
             runs=16384,
         )
-        print(mean, var)
+        print('Kuhn arena:', mean)
