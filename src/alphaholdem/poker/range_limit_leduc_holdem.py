@@ -66,6 +66,17 @@ class RangeLimitLeducHoldem(RangePokerGame):
             player_range=self.player_range,
         )
 
+    def _refresh_board(self):
+        if self.street == Street.Preflop or self.street == Street.Showdown:
+            return
+        # self.factor *= 3
+        need_to_deal = self.num_street_board_cards[self.street.value - 1]
+        already_dealed = sum(self.num_street_board_cards[:self.street.value - 1])
+        if self.custom_board_cards is not None and len(self.custom_board_cards) >= already_dealed + need_to_deal:
+            self.board_cards.extend(self.custom_board_cards[already_dealed:already_dealed + need_to_deal])
+        else:
+            self.board_cards.extend(self.dealer.deal(need_to_deal))
+
     def step(self, action: np.ndarray) -> Observation:
         action = action.clip(0, 1)
         action_prob = action.copy()
@@ -101,6 +112,10 @@ class RangeLimitLeducHoldem(RangePokerGame):
         self.factor *= num_actions
 
         sample = np.random.randint(0, num_actions)
+        # if self.current_player == 0:
+        #     sample = num_actions - 1
+        # else:
+        #     sample = 0
 
         s = [sum(action_prob[0:4]), sum(action_prob[4:8]), sum(action_prob[8:12])]
 
@@ -112,7 +127,6 @@ class RangeLimitLeducHoldem(RangePokerGame):
                     return super().step(legal_actions[i])
                 else:
                     sample -= 1
-
 
     def _calculate_payoff(self) -> list[float]:
         return self.judger.judge(

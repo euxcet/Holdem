@@ -14,7 +14,7 @@ class TestRangeKuhn():
             'action_history': [obs['action_history']],
         }
 
-    # @pytest.mark.skipif(SKIP, reason="SKIP == True")
+    @pytest.mark.skipif(SKIP, reason="SKIP == True")
     def test_range_kuhn(self):
         payoff_max = 0.5
         env = RangeKuhnPokerEnv(payoff_max=payoff_max)

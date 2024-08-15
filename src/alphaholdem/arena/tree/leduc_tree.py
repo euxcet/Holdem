@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+# f = None
+
 class LeducNode():
     def __init__(
         self,
@@ -22,7 +24,11 @@ class LeducNode():
         self.board_card = board_card
     
     def dfs_ev(self, reach_prob: float) -> float:
+        # global f
+        # if f is None:
+        #     f = open("strategy/terminal_leduc.txt", 'w')
         if self.is_terminal:
+            # f.write('Terminal ' + str(self.action_history) + ' ' + str(self.hole_cards) + ' ' + str(self.board_card) + ' ' + str(self.payoff) + ' ' + str(reach_prob) + '\n')
             # print('Terminal', self.action_history, self.hole_cards, self.board_card, self.payoff, reach_prob)
             return reach_prob * self.payoff[0]
         payoff = 0.0

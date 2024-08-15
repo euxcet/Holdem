@@ -52,11 +52,22 @@ class RangeLeducJudger(Judger):
                 # prob *= player_range[1][player1_card.rank - 9]
                 # prob = player_range[0][player0_card.rank - 9] * player_range[1][player1_card.rank - 9] / 6
                 # tot += prob
-                if player0_card == player1_card:
-                    prob = player_range[0][player0_card.rank - 9] * player_range[1][player1_card.rank - 9] / 2 / 7.5
+                if len(board_cards) == 0:
+                    if player0_card == player1_card:
+                        prob = player_range[0][player0_card.rank - 9] * player_range[1][player1_card.rank - 9] / 15
+                    else:
+                        prob = player_range[0][player0_card.rank - 9] * player_range[1][player1_card.rank - 9] / 7.5
                 else:
-                    prob = player_range[0][player0_card.rank - 9] * player_range[1][player1_card.rank - 9] / 7.5
+                    if player0_card == player1_card and player0_card == board_cards[0]:
+                        prob = 0
+                    elif player0_card == player1_card or player0_card == board_cards[0] or player1_card == board_cards[0]:
+                        prob = player_range[0][player0_card.rank - 9] * player_range[1][player1_card.rank - 9] / 10
+                    else:
+                        prob = player_range[0][player0_card.rank - 9] * player_range[1][player1_card.rank - 9] / 5
+
                 # tot += prob
+
+                # print(board_cards, player0_card, player1_card, prob, this_payoff[0], this_payoff[1], factor, prob * factor)
 
                 payoff[0] += this_payoff[0] * prob * factor
                 payoff[1] += this_payoff[1] * prob * factor

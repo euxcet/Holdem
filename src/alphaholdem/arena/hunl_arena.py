@@ -1,13 +1,34 @@
 import numpy as np
+from .policy.policy import Policy
+from typing_extensions import override
 from .envs.no_limit_texas_holdem_env import create_no_limit_holdem_env
 from ..poker.no_limit_texas_holdem_env import NoLimitTexasHoldemEnv
 from .policy.ppo_poker_policy import PPOPokerPolicy
 from .policy.hunl.tf_texas_policy import TFTexasPolicy
 
 # TODO: refactor
-class TexasArena():
+class HunlArena():
     def __init__(self, tf_checkpoint: str = './checkpoint/38000_model/model.ckpt') -> None:
-        self.tf = TFTexasPolicy(model_path=tf_checkpoint)
+        self.nash = None
+        # self.tf = TFTexasPolicy(model_path=tf_checkpoint)
+
+    @override
+    @property
+    def nash_policy(self) -> Policy:
+        return self.nash
+
+    @override
+    def validate_policy(self, policy: Policy) -> None:
+        ...
+
+    @override
+    def policy_vs_policy(
+        self,
+        policy0: Policy,
+        policy1: Policy,
+        runs: int = 1024,
+    ) -> tuple[float, float]:
+        ...
 
     def ppo_vs_tf(
         self,

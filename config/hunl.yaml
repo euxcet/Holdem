@@ -11,13 +11,13 @@ game:
   num_action: 9
 
 resources:
-  num_cpus: 64
+  num_cpus: 16
   num_gpus: 4
 
 rllib:
   num_rollout_workers: 16
   num_envs_per_worker: 4
-  num_cpus_per_worker: 0.125
+  num_cpus_per_worker: 0.25
   num_gpus_per_worker: 0.035
   num_gpus_algorithm: 0.5
   num_learner_workers: 0
@@ -48,10 +48,11 @@ hyper:
 
 self_play:
   type: naive
-  arena: texas
+  arena: hunl
+  policy_type: hunl
   rule_based_policies: []
   num_opponent_limit: 1
-  num_update_iter: 10
+  num_update_iter: 100
   arena_runs: 16384
 
 policy:

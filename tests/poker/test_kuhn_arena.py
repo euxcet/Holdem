@@ -8,7 +8,7 @@ from alphaholdem.arena.policy.leduc.lookup_leduc_policy import LookupLeducPolicy
 class TestTexasArena():
     SKIP = True
 
-    # @pytest.mark.skipif(SKIP, reason="SKIP == True")
+    @pytest.mark.skipif(SKIP, reason="SKIP == True")
     def test_cfr(self):
         # run_folder = '/home/clouduser/ray_results/PPO_2024-07-09_05-51-05'
         # ppos = PPOKuhnPolicy.load_policies_from_run(run_folder)

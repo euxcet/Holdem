@@ -5,7 +5,7 @@ game:
   legal_raise_pot_size: []
   num_runs: 20
   initial_chips: 15
-  payoff_max: 15
+  payoff_max: 1
   circular_train: false
   custom_board_cards: null
   num_action: 4

@@ -73,8 +73,8 @@ class SelfPlayCallback(DefaultCallbacks, ABC):
 
     def calc_metric(self, result: dict, policy: Policy) -> None:
         main_reward = result["hist_stats"]["policy_learned_reward"]
-        print(type(main_reward))
-        print('Isnan', any(np.isnan(main_reward)), main_reward[:10])
+        # print(type(main_reward))
+        # print('Isnan', any(np.isnan(main_reward)), min(main_reward), max(main_reward), main_reward[:10])
         win_rate = sum(main_reward) / len(main_reward) * 50.0 * self.payoff_max
         self.win_rate_window.push(win_rate)
         result["win_rate"] = win_rate

@@ -14,10 +14,11 @@ class TestLeducArena():
 
     @pytest.mark.skipif(SKIP, reason="SKIP == True")
     def test_range_policy(self):
-        ppos = PPORangeLeducPolicy.load_policies_from_run('/home/clouduser/ray_results/PPO_2024-07-28_05-18-06')
+        # ppos = PPORangeLeducPolicy.load_policies_from_run('/home/clouduser/ray_results/PPO_2024-07-28_05-18-06')
         mean, var = LeducArena('/home/clouduser/zcc/Holdem/strategy/leduc_nash.txt').policy_vs_policy(
             policy0=LookupLeducPolicy('/home/clouduser/zcc/Holdem/strategy/leduc_nash.txt'),
-            policy1=ppos[-1],
+            policy1=LookupLeducPolicy('/home/clouduser/zcc/Holdem/strategy/leduc_ppo.txt'),
+            # policy1=ppos[-1],
             runs=16384,
         )
         print(mean, var)

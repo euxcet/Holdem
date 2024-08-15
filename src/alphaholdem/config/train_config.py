@@ -28,18 +28,19 @@ class TrainConfig():
             self.num_action = num_action
 
         @staticmethod
-        def load_from_dict(data: dict) -> TrainConfig.TrainGameConfig:
+        def load_from_dict(data: dict | None) -> TrainConfig.TrainGameConfig:
+            if data is None: return None
             return TrainConfig.TrainGameConfig(
-                type=data['type'],
-                num_players=data['num_players'],
-                showdown_street=data['showdown_street'],
-                legal_raise_pot_size=data['legal_raise_pot_size'],
-                num_runs=data['num_runs'],
-                initial_chips=data['initial_chips'],
-                payoff_max=data['payoff_max'],
-                circular_train=data['circular_train'],
-                custom_board_cards=data['custom_board_cards'],
-                num_action=data['num_action'],
+                type=data.get('type'),
+                num_players=data.get('num_players'),
+                showdown_street=data.get('showdown_street'),
+                legal_raise_pot_size=data.get('legal_raise_pot_size'),
+                num_runs=data.get('num_runs'),
+                initial_chips=data.get('initial_chips'),
+                payoff_max=data.get('payoff_max'),
+                circular_train=data.get('circular_train'),
+                custom_board_cards=data.get('custom_board_cards'),
+                num_action=data.get('num_action'),
             )
 
     class TrainResourcesConfig():
@@ -52,10 +53,11 @@ class TrainConfig():
             self.num_gpus = num_gpus
         
         @staticmethod
-        def load_from_dict(data: dict) -> TrainConfig.TrainResourcesConfig:
+        def load_from_dict(data: dict | None) -> TrainConfig.TrainResourcesConfig:
+            if data is None: return None
             return TrainConfig.TrainResourcesConfig(
-                num_cpus=data['num_cpus'],
-                num_gpus=data['num_gpus'],
+                num_cpus=data.get('num_cpus'),
+                num_gpus=data.get('num_gpus'),
             )
     
     class TrainHyperConfig():
@@ -98,25 +100,26 @@ class TrainConfig():
             self.stop_training_iteration = stop_training_iteration
         
         @staticmethod
-        def load_from_dict(data: dict) -> TrainConfig.TrainHyperConfig:
+        def load_from_dict(data: dict | None) -> TrainConfig.TrainHyperConfig:
+            if data is None: return None
             return TrainConfig.TrainHyperConfig(
-                model=data['model'],
-                learning_rate=data['learning_rate'],
-                clip_param=data['clip_param'],
-                entropy_coeff=data['entropy_coeff'],
-                train_batch_size=data['train_batch_size'],
-                sgd_minibatch_size=data['sgd_minibatch_size'],
-                num_sgd_iter=data['num_sgd_iter'],
-                kl_coeff=data['kl_coeff'],
-                kl_target=data['kl_target'],
-                vf_clip_param=data['vf_clip_param'],
-                vf_loss_coeff=data['vf_loss_coeff'],
-                checkpoint_frequency=data['checkpoint_frequency'],
-                checkpoint_num_to_keep=data['checkpoint_num_to_keep'],
-                num_update_iter=data['num_update_iter'],
-                win_rate_threshold=data['win_rate_threshold'],
-                stop_timesteps_total=data['stop_timesteps_total'],
-                stop_training_iteration=data['stop_training_iteration'],
+                model=data.get('model'),
+                learning_rate=data.get('learning_rate'),
+                clip_param=data.get('clip_param'),
+                entropy_coeff=data.get('entropy_coeff'),
+                train_batch_size=data.get('train_batch_size'),
+                sgd_minibatch_size=data.get('sgd_minibatch_size'),
+                num_sgd_iter=data.get('num_sgd_iter'),
+                kl_coeff=data.get('kl_coeff'),
+                kl_target=data.get('kl_target'),
+                vf_clip_param=data.get('vf_clip_param'),
+                vf_loss_coeff=data.get('vf_loss_coeff'),
+                checkpoint_frequency=data.get('checkpoint_frequency'),
+                checkpoint_num_to_keep=data.get('checkpoint_num_to_keep'),
+                num_update_iter=data.get('num_update_iter'),
+                win_rate_threshold=data.get('win_rate_threshold'),
+                stop_timesteps_total=data.get('stop_timesteps_total'),
+                stop_training_iteration=data.get('stop_training_iteration'),
             )
 
     class TrainRLlibConfig():
@@ -145,18 +148,19 @@ class TrainConfig():
             self.verbose = verbose
             
         @staticmethod
-        def load_from_dict(data: dict) -> TrainConfig.TrainRLlibConfig:
+        def load_from_dict(data: dict | None) -> TrainConfig.TrainRLlibConfig:
+            if data is None: return None
             return TrainConfig.TrainRLlibConfig(
-                num_rollout_workers=data['num_rollout_workers'],
-                num_envs_per_worker=data['num_envs_per_worker'],
-                num_cpus_per_worker=data['num_cpus_per_worker'],
-                num_gpus_per_worker=data['num_gpus_per_worker'],
-                num_gpus_algorithm=data['num_gpus_algorithm'],
-                num_learner_workers=data['num_learner_workers'],
-                framework=data['framework'],
-                log_level=data['log_level'],
-                evaluation_interval=data['evaluation_interval'],
-                verbose=data['verbose'],
+                num_rollout_workers=data.get('num_rollout_workers'),
+                num_envs_per_worker=data.get('num_envs_per_worker'),
+                num_cpus_per_worker=data.get('num_cpus_per_worker'),
+                num_gpus_per_worker=data.get('num_gpus_per_worker'),
+                num_gpus_algorithm=data.get('num_gpus_algorithm'),
+                num_learner_workers=data.get('num_learner_workers'),
+                framework=data.get('framework'),
+                log_level=data.get('log_level'),
+                evaluation_interval=data.get('evaluation_interval'),
+                verbose=data.get('verbose'),
             )
     
     class TrainSelfPlayConfig():
@@ -179,15 +183,16 @@ class TrainConfig():
             self.arena_runs = arena_runs
         
         @staticmethod
-        def load_from_dict(data: dict) -> TrainConfig.TrainSelfPlayConfig:
+        def load_from_dict(data: dict | None) -> TrainConfig.TrainSelfPlayConfig:
+            if data is None: return None
             return TrainConfig.TrainSelfPlayConfig(
-                type=data['type'],
-                arena=data['arena'],
-                policy_type=data['policy_type'],
-                rule_based_policies=data['rule_based_policies'],
-                num_opponent_limit=data['num_opponent_limit'],
-                num_update_iter=data['num_update_iter'],
-                arena_runs=data['arena_runs'],
+                type=data.get('type'),
+                arena=data.get('arena'),
+                policy_type=data.get('policy_type'),
+                rule_based_policies=data.get('rule_based_policies'),
+                num_opponent_limit=data.get('num_opponent_limit'),
+                num_update_iter=data.get('num_update_iter'),
+                arena_runs=data.get('arena_runs'),
             )
 
     class TrainPolicyConfig():
@@ -202,11 +207,12 @@ class TrainConfig():
             self.kuhn_nash = kuhn_nash
 
         @staticmethod
-        def load_from_dict(data: dict) -> TrainConfig.TrainPolicyConfig:
+        def load_from_dict(data: dict | None) -> TrainConfig.TrainPolicyConfig:
+            if data is None: return None
             return TrainConfig.TrainPolicyConfig(
-                alphaholdem=data['alphaholdem'],
-                leduc_nash=data['leduc_nash'],
-                kuhn_nash=data['kuhn_nash'],
+                alphaholdem=data.get('alphaholdem'),
+                leduc_nash=data.get('leduc_nash'),
+                kuhn_nash=data.get('kuhn_nash'),
             )
     
     def __init__(
@@ -226,12 +232,13 @@ class TrainConfig():
         self.policy = policy
 
     @staticmethod
-    def load_from_dict(data: dict):
+    def load_from_dict(data: dict | None) -> TrainConfig:
+        if data is None: return None
         return TrainConfig(
-            game=TrainConfig.TrainGameConfig.load_from_dict(data['game']),
-            resources=TrainConfig.TrainResourcesConfig.load_from_dict(data['resources']),
-            hyper=TrainConfig.TrainHyperConfig.load_from_dict(data['hyper']),
-            rllib=TrainConfig.TrainRLlibConfig.load_from_dict(data['rllib']),
-            self_play=TrainConfig.TrainSelfPlayConfig.load_from_dict(data['self_play']),
-            policy=TrainConfig.TrainPolicyConfig.load_from_dict(data['policy']),
+            game=TrainConfig.TrainGameConfig.load_from_dict(data.get('game')),
+            resources=TrainConfig.TrainResourcesConfig.load_from_dict(data.get('resources')),
+            hyper=TrainConfig.TrainHyperConfig.load_from_dict(data.get('hyper')),
+            rllib=TrainConfig.TrainRLlibConfig.load_from_dict(data.get('rllib')),
+            self_play=TrainConfig.TrainSelfPlayConfig.load_from_dict(data.get('self_play')),
+            policy=TrainConfig.TrainPolicyConfig.load_from_dict(data.get('policy')),
         )
