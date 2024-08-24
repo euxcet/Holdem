@@ -215,6 +215,6 @@ def train():
         })
         if train_loss < min_loss:
             min_loss = train_loss
-            torch.save(model.state_dict(), './checkpoint/supervise/supervise.pt')
+            torch.save(model.module.state_dict(), './checkpoint/supervise/supervise.pt')
         if epoch % 100 == 0:
-            torch.save(model.state_dict(), './checkpoint/supervise/supervise_' + str(epoch) + '.pt')
+            torch.save(model.module.state_dict(), './checkpoint/supervise/supervise_' + str(epoch) + '.pt')

@@ -32,7 +32,6 @@
             </div>
         </div>
     </div>
-
 </template>
 
 <script setup lang="ts">
@@ -52,6 +51,7 @@ const {
     highlight_action,
     detail_policy,
     detail_cell_name,
+    policy_prior
 } = storeToRefs(texasStore)
 
 </script>

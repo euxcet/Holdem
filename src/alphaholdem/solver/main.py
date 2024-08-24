@@ -5,8 +5,8 @@ import numpy as np
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from alphaholdem.poker.component.street import Street
 from .solver import Solver
+from ..poker.component.street import Street
 
 class PolicyQuery(BaseModel):
     board_cards: list[str]
@@ -73,4 +73,4 @@ async def get_policy(query: PolicyQuery):
     return pretty_floats({"policy": policy.tolist(), "observation": observation})
 
 def main():
-    uvicorn.run(app='alphaholdem_solver.main:app', host='0.0.0.0', port=18889, reload=True)
+    uvicorn.run(app='alphaholdem.solver.main:app', host='0.0.0.0', port=18889, reload=True)

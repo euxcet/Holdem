@@ -128,7 +128,8 @@ export const useTexasStore = defineStore('texas', {
             return policy
         },
 
-        async perform_action(step: number, action: number) {
+        async perform_action(step: number, localAction: number, action: number) {
+            console.log(action)
             if (this.running) {
                 return
             }
@@ -141,7 +142,7 @@ export const useTexasStore = defineStore('texas', {
             let prior = this.get_last_policy_prior(step)
             let new_prior = []
             for (var i = 0; i < prior.length; i++) {
-                new_prior.push(prior[i] * this.policy_history[step][i][action])
+                new_prior.push(prior[i] * this.policy_history[step][i][localAction])
             }
             this.policy_prior.push(new_prior)
             let response = await this.get_policy()

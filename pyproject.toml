@@ -20,6 +20,8 @@ dependencies = [
     "omegaconf>=2.3.0",
     "pytest>=8.2.2",
     "lightning>=2.4.0",
+    "fastapi>=0.112.1",
+    "uvicorn>=0.30.6",
 ]
 requires-python = ">=3.11, <3.12"
 readme = "README.md"
@@ -38,3 +40,4 @@ train = {call = "alphaholdem.train:main"}
 server = {call = "alphaholdem.server:start_server"}
 client = {call = "alphaholdem.server.console_client:main"}
 supervise = {call = "alphaholdem.supervise.train:train"}
+web = {call = "alphaholdem.solver.main:main"}

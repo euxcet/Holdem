@@ -24,6 +24,7 @@ class NoLimitTexasHoldemEnv(PokerGameEnv):
         showdown_street: Street = Street.Showdown,
         custom_board_cards: list[Card] = None,
         circular_train: bool = False,
+        raise_pot_size: list[float] = [0.5, 0.75, 1, 1.5, 2],
         legal_raise_pot_size: list[float] = [0.5, 0.75, 1, 1.5, 2],
         payoff_max: float = 200,
     ) -> None:
@@ -33,6 +34,7 @@ class NoLimitTexasHoldemEnv(PokerGameEnv):
             num_runs=num_runs,
             showdown_street=showdown_street,
             custom_board_cards=custom_board_cards,
+            raise_pot_size=raise_pot_size,
             legal_raise_pot_size=legal_raise_pot_size,
         )
         super().__init__(
