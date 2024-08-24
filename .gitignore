@@ -166,3 +166,6 @@ ray_results/
 checkpoint/
 logs/
 result/
+
+*.pt
+wandb/

@@ -46,6 +46,7 @@ class PokerGame():
         showdown_street: Street = Street.Showdown,
         num_street_board_cards: list[int] = [3, 1, 1],
         action_shape: int = None,
+        street_start_player: int = 0,
     ) -> None:
         self.verbose = verbose
         self.num_players = num_players
@@ -69,6 +70,7 @@ class PokerGame():
         self.num_street_board_cards = num_street_board_cards
         self.num_board_cards = sum(self.num_street_board_cards)
         self.action_shape = 4 + len(self.raise_pot_size) if action_shape is None else action_shape
+        self.street_start_player = street_start_player
         if initial_chips is None:
             self.initial_chips = [self.DEFAULT_INITIAL_CHIPS] * num_players
         elif type(initial_chips) is int:
@@ -247,6 +249,9 @@ class PokerGame():
             log_action = deepcopy(self.log_action),
             is_over = self.is_over(),
         )
+    
+    def _is_raise_all_in(self, raise_chip: int) -> bool:
+        return raise_chip == self.player_chips[self.current_player]
 
     def _is_fold_legal(self) -> bool:
         return self._is_fold_legal_msg()[0]
@@ -278,7 +283,7 @@ class PokerGame():
             return False, 'This game does not support players to call.'
         if (self.player_chips[self.current_player] <=
             self.street_raise - self.player_street_bet[self.current_player]):
-            return False, 'Player should go all_in instead of call_ing.'
+            return False, 'Player should go all in instead of calling.'
         return self.street_raise > self.player_street_bet[self.current_player], 'Call when there is no raise, please use check instead.'
 
     def _is_raise_legal(self, raise_chip: int) -> bool:
@@ -307,7 +312,7 @@ class PokerGame():
         if self.player_street_num_actions[self.current_player] >= self.max_num_actions_street:
             return False, 'Player exhausts the number of actions on this street.'
         if not self.legal_action_type[ActionType.All_in.value]:
-            return False, 'This game does not support players to all-in.'
+            return False, 'This game does not support players to all in.'
         all_in_chip = self.player_chips[self.current_player]
         all_in_to = all_in_chip + self.player_street_bet[self.current_player]
         _, raise_pot = self._calculate_raise_chip(raise_chip = all_in_chip)
@@ -421,7 +426,7 @@ class PokerGame():
         self.player_street_act = [False] * self.num_players
         self.player_street_num_actions = [0] * self.num_players
         self.player_street_num_raises = [0] * self.num_players
-        self.current_player = self._next_unfinished_player(0)
+        self.current_player = self._next_unfinished_player(self.street_start_player)
 
     def _refresh_board(self):
         if self.street == Street.Preflop or self.street == Street.Showdown:
@@ -457,6 +462,28 @@ class PokerGame():
             )
             payoff = [x + y / self.num_runs for x, y in zip(payoff, self.run_payoff)]
         return payoff
+    
+    def step_str(self, action_str: str) -> Observation:
+        action = None
+        if action_str == 'fold' and self._is_fold_legal():
+            action = self.create_action(ActionType.Fold)
+        elif action_str == 'check' and self._is_check_legal():
+            action = self.create_action(ActionType.Check)
+        elif action_str == 'call' and self._is_call_legal():
+            action = self.create_action(ActionType.Call)
+        elif action_str[:5] == 'raise':
+            try:
+                chips = int(action_str[5:]) // 100
+                if self._is_raise_all_in(chips): # all in
+                    if self._is_all_in_legal():
+                        action = self.create_action(ActionType.All_in)
+                elif self._is_raise_legal(chips):
+                    action = self.create_action(ActionType.Raise, raise_chip=chips)
+            except:
+                ...
+        if action is not None:
+            return self.step(action)
+        return None
     
     def step(self, action: Action) -> Observation:
         if self.verbose:
