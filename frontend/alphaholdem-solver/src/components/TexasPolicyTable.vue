@@ -2,7 +2,7 @@
     <div class="policy-table">
         <div class="overall-policy-table">
             <div v-for="(row, rowIndex) in overall_policy" :key="rowIndex" class="policy-row">
-                <div v-for="(element, colIndex) in row" :key="colIndex" class="policy-element" @click="gameStore.switch_detail_cell(rowIndex, colIndex)">
+                <div v-for="(element, colIndex) in row" :key="colIndex" class="policy-element" @click="texasStore.switch_detail_cell(rowIndex, colIndex)">
                     <div class="policy-cell-mask"> </div>
                     <div class="policy-combo-name">
                         <span>{{ overall_cell_name[rowIndex][colIndex] }}</span>
@@ -118,22 +118,22 @@ const {
     background-color: rgb(48, 16, 14);
 }
 
-/* Raise 25% */
+/* Raise 0 */
 .policy-prob-4 {
     background-color: rgb(220, 76, 69);
 }
 
-/* Raise 50% */
+/* Raise 1 */
 .policy-prob-5 {
     background-color: rgb(186, 63, 57);
 }
 
-/* Raise 75% */
+/* Raise 2 */
 .policy-prob-6 {
     background-color: rgb(132, 45, 41);
 }
 
-/* Raise 125% */
+/* Raise 3 */
 .policy-prob-7 {
     background-color: rgb(115, 39, 35);
 }

@@ -140,7 +140,7 @@ class PokerGame():
                 self.pot += blind
                 self.player_chips[player] -= blind
                 self.player_bet[player] = blind
-                self.player_street_bet[i] = blind
+                self.player_street_bet[player] = blind
                 self.street_raise = blind
                 self.street_raise_delta = blind
 

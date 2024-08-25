@@ -7,7 +7,7 @@ export const useTexasStore = defineStore('texas', {
         return {
             // when need to select an action at step s, starting from 0.
             action_history: [] as number[], // s * 1
-            policy_history: [], // (s + 1) * 1326 * 8
+            policy_history: [], // (s + 1) * 1326 * num_actions
             policy_prior: [] as number[][], // s * 1326, prior after this step
             observation_history: [], // (s + 1) * ...
             board_cards: [] as string[],
@@ -19,16 +19,17 @@ export const useTexasStore = defineStore('texas', {
             overall_cell_name: [] as string[][],
             highlight_action: -1,
             running: false,
+            num_actions: 0,
         }
     },
     actions: {
         empty_overall_policy() {
             return Array.from({ length: 13 }, () =>
-                Array.from({ length: 13 }, () => Array(8).fill(0)))
+                Array.from({ length: 13 }, () => Array(this.num_actions).fill(0)))
         },
         empty_detail_policy() {
             return Array.from({ length: 3 }, () =>
-                Array.from({ length: 4 }, () => Array(8).fill(0)))
+                Array.from({ length: 4 }, () => Array(this.num_actions).fill(0)))
         },
 
         get_overall_cell_name(): string[][] {
@@ -87,6 +88,7 @@ export const useTexasStore = defineStore('texas', {
             this.policy_history = []
             this.board_cards = ['8h', '8s', '5h', '2d', '7h']
             let response = await this.get_policy()
+            this.num_actions = response.policy[0].length
             this.policy_history.push(response.policy)
             this.observation_history.push(response.observation)
             this.current_step = 0
@@ -128,8 +130,7 @@ export const useTexasStore = defineStore('texas', {
             return policy
         },
 
-        async perform_action(step: number, localAction: number, action: number) {
-            console.log(action)
+        async perform_action(step: number, action: number) {
             if (this.running) {
                 return
             }
@@ -142,7 +143,7 @@ export const useTexasStore = defineStore('texas', {
             let prior = this.get_last_policy_prior(step)
             let new_prior = []
             for (var i = 0; i < prior.length; i++) {
-                new_prior.push(prior[i] * this.policy_history[step][i][localAction])
+                new_prior.push(prior[i] * this.policy_history[step][i][action])
             }
             this.policy_prior.push(new_prior)
             let response = await this.get_policy()
@@ -194,7 +195,7 @@ export const useTexasStore = defineStore('texas', {
                             [rank0, rank1] = [rank1, rank0];
                             [suit0, suit1] = [suit1, suit0]
                         }
-                        for (var i = 0; i < 8; i++) {
+                        for (var i = 0; i < this.num_actions; i++) {
                             policy[Math.floor(count / 4)][count % 4][i] += policy_list[current][i] * policy_prior[current]
                             this.detail_cell_name[Math.floor(count / 4)][count % 4] =
                                 this.card_to_str(rank0, suit0) + this.card_to_str(rank1, suit1)
@@ -207,12 +208,12 @@ export const useTexasStore = defineStore('texas', {
             for (var i = 0; i < 3; i++) {
                 for (var j = 0; j < 4; j++) {
                     let s = 0
-                    for (var k = 0; k < 8; k++) {
+                    for (var k = 0; k < this.num_actions; k++) {
                         policy[i][j][k] = Math.max(Math.min(policy[i][j][k], 0.999 - s), 0)
                         s += policy[i][j][k]
                     }
                     if (s > 0.01) {
-                        for (var k = 0; k < 8; k++) {
+                        for (var k = 0; k < this.num_actions; k++) {
                             policy[i][j][k] = policy[i][j][k] / s
                         }
                     }
@@ -221,7 +222,7 @@ export const useTexasStore = defineStore('texas', {
             return policy
         },
 
-        // policy_list: 1326 * 8   policy_prior: 1326
+        // policy_list: 1326 * action_num   policy_prior: 1326
         calc_overall_policy(policy_list: number[][], policy_prior: number[]): number[][][] {
             let policy = this.empty_overall_policy()
             let current = 0
@@ -247,7 +248,7 @@ export const useTexasStore = defineStore('texas', {
                             [suit0, suit1] = [suit1, suit0]
                         }
                     }
-                    for (var i = 0; i < 8; i++) {
+                    for (var i = 0; i < this.num_actions; i++) {
                         policy[12 - rank0][12 - rank1][i] += policy_list[current][i] * ratio * policy_prior[current]
                     }
                     current += 1
@@ -256,12 +257,12 @@ export const useTexasStore = defineStore('texas', {
             for (var i = 0; i < 13; i++) {
                 for (var j = 0; j < 13; j++) {
                     let s = 0
-                    for (var k = 0; k < 8; k++) {
+                    for (var k = 0; k < this.num_actions; k++) {
                         policy[i][j][k] = Math.max(Math.min(policy[i][j][k], 0.999 - s), 0)
                         s += policy[i][j][k]
                     }
                     if (s > 0.01) {
-                        for (var k = 0; k < 8; k++) {
+                        for (var k = 0; k < this.num_actions; k++) {
                             policy[i][j][k] = policy[i][j][k] / s
                         }
                     }

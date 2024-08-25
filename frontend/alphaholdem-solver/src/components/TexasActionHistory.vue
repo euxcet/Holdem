@@ -21,8 +21,8 @@
             </div>
             <div class="action-block-container">
                 <div v-for="(action, actionIndex) in format_legal_actions(observation)"
-                    :key="actionIndex" @click="perform_action(obsIndex, action[0], action[2])"
-                    :class="'action-block action-block' + (action_history[obsIndex] == action[2] ? '-s' : '')" 
+                    :key="actionIndex" @click="perform_action(obsIndex, action[0])"
+                    :class="'action-block action-block' + (action_history[obsIndex] == action[0] ? '-s' : '')" 
                     @mouseover="actionMouseOver(obsIndex, action[0])"
                     @mouseleave="actionMouseLeave(obsIndex, action[0])">
                     {{ action[1] }}
@@ -59,8 +59,8 @@ function actionMouseLeave(obsIndex: number, actionIndex: number) {
     }
 }
 
-async function perform_action(obsIndex: number, localActionIndex: number, actionIndex: number) {
-    await texasStore.perform_action(obsIndex, localActionIndex, actionIndex)
+async function perform_action(obsIndex: number, actionIndex: number) {
+    await texasStore.perform_action(obsIndex, actionIndex)
 }
 
 async function switch_obs(obsIndex: number) {
@@ -71,10 +71,11 @@ function format_legal_actions(observation) {
     let result = []
     let actions = observation.legal_actions
     // let action_name = ["Fold", "Check", "Call", "All in", "Raise 25%", "Raise 50%", "Raise 75%", "Raise 125%"]
-    let action_name = [[0, "Fold", 0], [1, "Check", 1], [2, "Call", 2], [3, "All in", 3], [7, "Raise 100%", 4]]
+    // TODO: get aciton names from the observation
+    let action_name = ["Fold", "Check", "Call", "All in", "Raise 100%"]
     for (var i = 0; i < actions.length; i++) {
         if (actions[i] != null) {
-            result.push(action_name[i])
+            result.push([i, action_name[i]])
         }
     }
     return result

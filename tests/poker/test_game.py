@@ -17,6 +17,8 @@ class TestGame():
             custom_board_cards=Card.from_str_list(['Ac', '8c', '5h', '6c', '7h']),
             showdown_street=Street.Showdown,
             num_runs=1000,
+            raise_pot_size=[1],
+            legal_raise_pot_size=[1],
             custom_player_hole_cards=[
                 Card.from_str_list(['Ks', '7s']),
                 Card.from_str_list(['Kc', '7c']),
@@ -24,23 +26,11 @@ class TestGame():
         )
         game.reset()
         obs = game.observe_current()
-        game.step(obs.legal_actions[2])
+        game.step(obs.legal_actions[4])
         obs = game.observe_current()
-        game.step(obs.legal_actions[1])
+        game.step(obs.legal_actions[4])
         obs = game.observe_current()
-        game.step(obs.legal_actions[1])
-        obs = game.observe_current()
-        game.step(obs.legal_actions[1])
-        obs = game.observe_current()
-        game.step(obs.legal_actions[1])
-        obs = game.observe_current()
-        game.step(obs.legal_actions[1])
-        obs = game.observe_current()
-        game.step(obs.legal_actions[7])
-        obs = game.observe_current()
-        game.step(obs.legal_actions[2])
-        obs = game.observe_current()
-        # print(obs)
+        print(obs)
 
     # Fold Check Call All_in Raise_25% Raise_50% Raise_75% Raise_125%
     # 0    1     2    3      4         5         6         7

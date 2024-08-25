@@ -76,10 +76,10 @@ pdm run train
 
 ### TODO
 
-- [x] leduc, texas游戏环境
+- [x] kuhn, leduc, texas游戏环境
 - [x] wandb训练可视化
-- [x] self play
-- [ ] 改进loss
-- [ ] 分阶段训练
-- [ ] 维护双方range
+- [x] self play训练
+- [x] deepstack监督学习
+- [ ] 完善test
+- [ ] 改进前端（选board牌、过滤不可能combo）
 - [ ] 多人德州

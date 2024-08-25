@@ -1,5 +1,5 @@
 import pytest
-from alphaholdem.arena.hunl_arena import TexasArena
+from alphaholdem.arena.hunl_arena import HunlArena
 from alphaholdem.arena.policy.hunl.ppo_hunl_policy import PPOHunlPolicy
 from alphaholdem.arena.policy.hunl.tf_texas_policy import TFTexasPolicy
 
@@ -9,7 +9,7 @@ class TestTexasPolicy():
 
     @pytest.mark.skipif(SKIP, reason="SKIP == True")
     def test_ppo_vs_tf(self):
-        mean, var = TexasArena().ppo_vs_tf(
+        mean, var = HunlArena().ppo_vs_tf(
             ppo=self.ppo,
             runs=1024,
         )
