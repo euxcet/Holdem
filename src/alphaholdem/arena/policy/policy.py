@@ -13,7 +13,6 @@ class Policy(ABC):
             actions.append(self.sample_action(env_obs, game_obs_list))
         return actions
 
-    # TODO: use np.ndarray instead of list[float]?
     @abstractmethod
     def get_policy(self, env_obs: dict, game_obs: Observation) -> np.ndarray:
         ...

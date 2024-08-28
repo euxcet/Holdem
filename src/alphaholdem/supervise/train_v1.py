@@ -1,3 +1,4 @@
+import time
 import random
 import os
 import numpy as np
@@ -16,7 +17,7 @@ from ..model.hunl_supervise_model import HUNLSuperviseModel
 from ..model.hunl_supervise_resnet import HUNLSuperviseResnet
 
 class PokerDataset(Dataset):
-    def __init__(self, folder: str) -> None:
+    def __init__(self, folder: str, length: int) -> None:
         self.hole_cards_mapping: list[tuple[Card, Card]] = []
         for i in range(52):
             for j in range(i):
@@ -25,9 +26,8 @@ class PokerDataset(Dataset):
         self.raw_xs, self.raw_ys = self._load(folder)
         self.raw_ys = self.raw_ys.transpose((0, 2, 1))
         self.lines = self.raw_xs.shape[0]
-        # self.xs, self.ys = self._to_hole_cards_input(self.raw_xs, self.raw_ys)
-        # print(self.xs.shape, self.ys.shape)
-        self.length = 1000000
+        self.length = length
+        self.data = [self._add_hole_cards(random.randint(0, self.lines - 1), random.randint(0, 1325)) for _ in range(self.length)]
 
     def _add_hole_cards(self, line_id: int, hole_id: int) -> tuple[np.ndarray, np.ndarray]:
         hole = self.hole_cards_mapping[hole_id]
@@ -161,11 +161,9 @@ class PokerDataset(Dataset):
 
     def __len__(self):
         return self.length
-        # return self.xs.shape[0]
 
     def __getitem__(self, index: int):
-        return self._add_hole_cards(random.randint(0, self.lines - 1), random.randint(0, 1325))
-        # return self.xs[index], self.ys[index]
+        return self.data[index]
 
 def validate(model, valid_loader):
     model.eval()
@@ -180,11 +178,8 @@ def validate(model, valid_loader):
     return mse / len(valid_loader)
 
 def train():
-    batch_size = 1024
+    batch_size = 16384
     wandb.init(project='supervise')
-    dataset = PokerDataset('/home/clouduser/zcc/Agent')
-    train_dataset, valid_dataset = random_split(dataset, [0.9, 0.1])
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     # valid_loader = DataLoader(valid_dataset, batch_size=batch_size, shuffle=False)
 
     # model = HUNLSuperviseResnet()
@@ -192,13 +187,18 @@ def train():
     # model = nn.DataParallel(model).to('cuda')
 
     model = nn.DataParallel(HUNLSuperviseResnet()).to('cuda')
-    optimizer = optim.Adam(model.parameters(), lr = 0.002)
+    optimizer = optim.Adam(model.parameters(), lr = 0.001)
     # optimizer = optim.Adam(model.parameters(), lr = 0.002)
     # scheduler = optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.9995)
     criterion = nn.MSELoss().to('cuda')
     min_loss = 100
     # print('Origin validation:', validate(model, valid_loader))
     for epoch in range(10000000):
+        t0 = time.time()
+        dataset = PokerDataset('/home/clouduser/zcc/Agent', 1000000)
+        train_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=16, pin_memory=True)
+        t1 = time.time()
+        print("Prepare data time:", t1 - t0)
         model.train()
         train_loss = 0
         for data, target in tqdm(train_loader):
@@ -223,3 +223,5 @@ def train():
             torch.save(model.module.state_dict(), './checkpoint/supervise/fast/supervise.pt')
         if epoch % 100 == 0:
             torch.save(model.module.state_dict(), './checkpoint/supervise/fast/supervise_c_' + str(epoch) + '.pt')
+        t2 = time.time()
+        print("Train time:", t2 - t1)

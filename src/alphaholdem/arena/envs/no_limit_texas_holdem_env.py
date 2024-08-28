@@ -7,5 +7,7 @@ def create_no_limit_holdem_env() -> NoLimitTexasHoldemEnv:
         initial_chips=200,
         showdown_street=Street.Showdown,
         circular_train=False,
+        raise_pot_size=[1],
+        legal_raise_pot_size=[1],
         payoff_max=200,
     )

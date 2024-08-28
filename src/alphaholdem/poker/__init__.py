@@ -29,6 +29,7 @@ def get_poker_env(cfg: TrainConfig.TrainGameConfig):
             showdown_street=cfg.showdown_street,
             custom_board_cards=cfg.custom_board_cards,
             circular_train=cfg.circular_train,
+            raise_pot_size=cfg.legal_raise_pot_size,
             legal_raise_pot_size=cfg.legal_raise_pot_size,
             payoff_max=cfg.payoff_max,
         ))

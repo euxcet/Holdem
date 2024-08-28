@@ -205,6 +205,7 @@ class HUNLSuperviseResnet(nn.Module):
             nn.ReLU(),
             nn.Linear(64, 4),
         )
+        # fold check/call raise all_in
 
     def forward(self, cards, action_history):
         card_out = self.card_net(cards)
