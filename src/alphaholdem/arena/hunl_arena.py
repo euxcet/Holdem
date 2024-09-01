@@ -8,7 +8,7 @@ from .policy.hunl.deepstack_hunl_policy import DeepstackHunlPolicy
 
 # TODO: refactor
 class HunlArena():
-    def __init__(self, model_path: str = './checkpoint/supervise/best.pt') -> None:
+    def __init__(self, model_path: str = './checkpoint/supervise/supervise.pt') -> None:
         self.nash = DeepstackHunlPolicy(model_path=model_path)
 
     @override
@@ -29,7 +29,9 @@ class HunlArena():
     ) -> tuple[float, float]:
         env: NoLimitTexasHoldemEnv = create_no_limit_holdem_env()
         result = []
-        for run in range(runs):
+        for run in range(0, runs, 2):
+        # for run in range(runs):
+            # print('run =', run)
             env.reset()
             while not env.is_over():
                 env_obs = env.observe_current()
@@ -38,7 +40,10 @@ class HunlArena():
                     env.step(policy0.sample_action(env_obs, game_obs))
                 else:
                     env.step(policy1.sample_action(env_obs, game_obs))
+            # print(env.game.player_hole_cards)
+            # print(env.game.observe_current(), env.agent_payoff())
             result.append(env.agent_payoff()[run % 2] * env.payoff_max * 50)
+            # x = input()
         return np.mean(result), np.std(result)
 
     def ppo_vs_tf(

@@ -5,7 +5,7 @@ from alphaholdem.arena.policy.kuhn.ppo_kuhn_policy import PPOKuhnPolicy
 from alphaholdem.arena.leduc_arena import LeducArena
 from alphaholdem.arena.policy.leduc.lookup_leduc_policy import LookupLeducPolicy
 
-class TestTexasArena():
+class TestKuhnArena():
     SKIP = True
 
     @pytest.mark.skipif(SKIP, reason="SKIP == True")

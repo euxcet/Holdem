@@ -15,7 +15,7 @@ resources:
   num_gpus: 4
 
 rllib:
-  num_rollout_workers: 16
+  num_rollout_workers: 1
   num_envs_per_worker: 4
   num_cpus_per_worker: 0.25
   num_gpus_per_worker: 0.035
@@ -31,7 +31,7 @@ hyper:
   learning_rate: 0.00001
   clip_param: 0.2
   entropy_coeff: 0.01
-  train_batch_size: 16384
+  train_batch_size: 1024
   sgd_minibatch_size: 256
   num_sgd_iter: 30
   kl_coeff: 0.2
@@ -41,7 +41,7 @@ hyper:
   opponent_count: 4
   num_update_iter: 20
   win_rate_threshold: 100
-  checkpoint_frequency: 10
+  checkpoint_frequency: 1
   checkpoint_num_to_keep: 10
   stop_timesteps_total: 2000000000
   stop_training_iteration: 400000

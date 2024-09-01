@@ -20,6 +20,7 @@ class DeepstackHunlPolicy(Policy):
     def sample_action(self, env_obs: dict, game_obs: Observation) -> int:
         policy = np.array(self.get_policy(env_obs, game_obs))
         policy /= policy.sum()
+        # print('deepstack', policy)
         return np.random.choice(len(policy), p=policy)
 
     @override
@@ -44,3 +45,4 @@ class DeepstackHunlPolicy(Policy):
     @override
     def get_all_policy(self) -> np.ndarray:
         ...
+    

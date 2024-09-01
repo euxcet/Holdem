@@ -28,6 +28,7 @@ class PPOPokerPolicy(Policy):
     @override
     def sample_actions(self, env_obs_list: list[dict], game_obs_list: list[Observation]) -> list[int]:
         policies = self.get_policies(env_obs_list, game_obs_list)
+        # print('ppo', policies)
         return [np.random.choice(len(policy), p=policy) for policy in policies]
     
     @override

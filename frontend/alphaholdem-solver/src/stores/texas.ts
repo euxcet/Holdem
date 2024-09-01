@@ -86,7 +86,7 @@ export const useTexasStore = defineStore('texas', {
             this.detail_policy = this.empty_detail_policy()
             this.action_history = []
             this.policy_history = []
-            this.board_cards = ['Ks', '8d', 'Th', 'Tc', '7h']
+            this.board_cards = ['6s', '5c', 'Qd', '4s', '3d']
             let response = await this.get_policy()
             this.num_actions = response.policy[0].length
             this.policy_history.push(response.policy)

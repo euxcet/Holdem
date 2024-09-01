@@ -16,3 +16,14 @@ class PPOHunlPolicy(PPOPokerPolicy):
     @override
     def get_all_policy(self) -> np.ndarray:
         ...
+
+    @staticmethod
+    def load_policy_from_run(run_folder: str) -> PPOHunlPolicy:
+        return PPOHunlPolicy(model_path=PPOPokerPolicy._load_all_model_path(run_folder)[-1])
+
+    @staticmethod
+    def load_policies_from_run(run_folder: str) -> list[PPOHunlPolicy]:
+        policies = []
+        for model_path in PPOHunlPolicy._load_all_model_path(run_folder):
+            policies.append(PPOHunlPolicy(model_path=model_path))
+        return policies
