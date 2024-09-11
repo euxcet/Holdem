@@ -31,10 +31,11 @@ class HUNLSuperviseModel(nn.Module):
             nn.ReLU(),
         )
         self.policy_fn = nn.Sequential(
-            nn.Linear(256, 64),
+            nn.Linear(256, 128),
+            nn.ReLU(),
+            nn.Linear(128, 64),
             nn.ReLU(),
             nn.Linear(64, 4),
-            nn.Softmax(),
         )
 
     def forward(self, cards, action_history):

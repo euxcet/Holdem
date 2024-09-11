@@ -1,26 +1,10 @@
-import random
 import os
 import numpy as np
-from tqdm import tqdm
-import wandb
-import torch
-import torch.nn as nn
-import torch.optim as optim
+from alphaholdem.poker.component.card import Card
 from torch.utils.data import Dataset
-from torch.utils.data import DataLoader, random_split
-from torch.utils.data.distributed import DistributedSampler
-from torch.nn.parallel import DistributedDataParallel
-from torchmetrics.regression import MeanSquaredError
-from ..poker.component.card import Card
-from ..model.hunl_supervise_model import HUNLSuperviseModel
-from ..model.hunl_supervise_small_model import HUNLSuperviseSmallModel
-from ..model.hunl_supervise_resnet import HUNLSuperviseResnet
-from ..model.hunl_supervise_resnet import HUNLSuperviseResnet50
 
 class PokerDataset(Dataset):
     def __init__(self, folder: str) -> None:
-        # self._export(folder)
-        # exit(0)
         self.hole_cards_mapping: list[tuple[Card, Card]] = []
         for i in range(52):
             for j in range(i):
@@ -29,11 +13,9 @@ class PokerDataset(Dataset):
         self.raw_xs, self.raw_ys = self._load(folder)
         self.raw_ys = self.raw_ys.transpose((0, 2, 1))
         self.lines = self.raw_xs.shape[0]
-        # self.xs, self.ys = self._to_hole_cards_input(self.raw_xs, self.raw_ys)
-        print(self.raw_xs.shape, self.raw_ys.shape)
-        # print(self.xs.shape, self.ys.shape)
         self.length = self.raw_xs.shape[0] * self.raw_ys.shape[1]
-        print(self.length)
+        # self.length = 1000000
+        print('Length of the dataset:', self.length)
 
     def _add_hole_cards(self, line_id: int, hole_id: int) -> tuple[np.ndarray, np.ndarray]:
         hole = self.hole_cards_mapping[hole_id]
@@ -44,8 +26,8 @@ class PokerDataset(Dataset):
         cards = data[:156].reshape(3, 4, 13)
         action_history = data[156:].reshape(4, 12, 5)
         cards = np.concatenate((hole_cards, cards))
-        return np.concatenate((cards.flatten(), action_history.flatten())), np.argmax(self.raw_ys[line_id][hole_id])
-        # return np.concatenate((cards.flatten(), action_history.flatten())), self.raw_ys[line_id][hole_id]
+        # return np.concatenate((cards.flatten(), action_history.flatten())), np.argmax(self.raw_ys[line_id][hole_id])
+        return np.concatenate((cards.flatten(), action_history.flatten())), self.raw_ys[line_id][hole_id]
 
     def _to_hole_cards_input(self, raw_xs: np.ndarray, raw_ys: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         xs = []
@@ -60,6 +42,7 @@ class PokerDataset(Dataset):
     def _load(self, folder: str) -> tuple[np.ndarray, np.ndarray]:
         xs, ys = None, None
         for name in sorted(os.listdir(folder)):
+            print('Load', name)
             if name.endswith('x.npy'):
                 if xs is None:
                     xs = np.load(os.path.join(folder, name))
@@ -168,80 +151,6 @@ class PokerDataset(Dataset):
 
     def __len__(self):
         return self.length
-        # return self.xs.shape[0]
 
     def __getitem__(self, index: int):
         return self._add_hole_cards(index // 1326, index % 1326)
-        # return self._add_hole_cards(random.randint(0, self.lines - 1), random.randint(0, 1325))
-        # return self.xs[index], self.ys[index]
-
-def validate(model, loader):
-    model.eval()
-    mean_square_error = MeanSquaredError().to('cuda')
-    mse = 0
-    for data, target in tqdm(loader):
-        cards = data[:, :208].reshape(-1, 4, 4, 13).to('cuda')
-        action_history = data[:, 208:].reshape(-1, 4, 12, 5).to('cuda')
-        target = target.flatten(1).to('cuda')
-        output = model(cards, action_history)
-        mse += mean_square_error(output, target)
-    return mse / len(loader)
-
-def train():
-    batch_size = 4096 * 16
-    train_dataset = PokerDataset('/home/clouduser/zcc/Agent')
-    # dataset = PokerDataset('/home/clouduser/zcc/Agent')
-    # train_dataset, valid_dataset = random_split(dataset, [0.9, 0.1])
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=False)
-    # valid_loader = DataLoader(valid_dataset, batch_size=batch_size, shuffle=False)
-
-    model = nn.DataParallel(HUNLSuperviseResnet()).to('cuda')
-
-    # model = HUNLSuperviseResnet50()
-    # model.load_state_dict(torch.load('./checkpoint/supervise/small/supervise.pt'))
-    # model = nn.DataParallel(model).to('cuda')
-
-    optimizer = optim.Adam(model.parameters(), lr = 0.0005)
-    # optimizer = optim.Adam(model.parameters(), lr = 0.002)
-    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.8)
-    # scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode="min", factor=0.5, patience=4, threshold=0.01)
-    # criterion = nn.MSELoss().to('cuda')
-    criterion = nn.CrossEntropyLoss().to('cuda')
-    min_loss = 100000.0
-
-    # print('Origin validation:', validate(model, valid_loader))
-
-    # validate(model, train_loader)
-
-    save_dir = './checkpoint/supervise/small_v1/'
-    os.makedirs(save_dir, exist_ok=True)
-    wandb.init(project='supervise_small')
-
-    for epoch in range(10000000):
-        model.train()
-        train_loss = 0
-        for data, target in tqdm(train_loader):
-            cards = data[:, :208].reshape(-1, 4, 4, 13).to('cuda')
-            action_history = data[:,208:].reshape(-1, 4, 12, 5).to('cuda')
-            # target = target.flatten(1).to('cuda')
-            target = target.to('cuda')
-            output = model(cards, action_history)
-            loss = criterion(output, target)
-            train_loss += loss.item()
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-        scheduler.step()
-        train_loss = train_loss / len(train_loader) * 100
-        print('Epoch:', epoch, 'Loss:', train_loss)
-        wandb.log({
-            'epoch': epoch,
-            'loss': train_loss,
-            'lr': optimizer.param_groups[0]['lr'],
-        })
-        if train_loss < min_loss:
-            min_loss = train_loss
-            torch.save(model.module.state_dict(), save_dir + '/supervise.pt')
-        if epoch % 100 == 0:
-            torch.save(model.module.state_dict(), save_dir + '/supervise_c_' + str(epoch) + '.pt')
-    wandb.finish()
