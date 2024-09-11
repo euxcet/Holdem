@@ -14,6 +14,7 @@ from torchmetrics.regression import MeanSquaredError
 from ..poker.component.card import Card
 from ..model.hunl_supervise_model import HUNLSuperviseModel
 from ..model.hunl_supervise_resnet import HUNLSuperviseResnet
+from ..model.hunl_supervise_one_hot import HUNLSuperviseOneHot, HUNLSuperviseOneHot50
 
 class PokerDataset(Dataset):
     def __init__(self, folder: str) -> None:
@@ -40,8 +41,7 @@ class PokerDataset(Dataset):
         cards = data[:156].reshape(3, 4, 13)
         action_history = data[156:].reshape(4, 12, 5)
         cards = np.concatenate((hole_cards, cards))
-        print(self.raw_ys[line_id][hole_id])
-        return np.concatenate((cards.flatten(), action_history.flatten())), self.raw_ys[line_id][hole_id]
+        return np.concatenate((cards.flatten(), action_history.flatten())), np.argmax(self.raw_ys[line_id][hole_id])
 
     def _to_hole_cards_input(self, raw_xs: np.ndarray, raw_ys: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         xs = []
@@ -167,6 +167,7 @@ class PokerDataset(Dataset):
         # return self.xs.shape[0]
 
     def __getitem__(self, index: int):
+        # return self._add_hole_cards(random.randint(0, 10), random.randint(0, 1325))
         return self._add_hole_cards(random.randint(0, self.lines - 1), random.randint(0, 1325))
         # return self.xs[index], self.ys[index]
 
@@ -184,36 +185,38 @@ def validate(model, loader):
     return mse / len(loader)
 
 def train():
-    batch_size = 65536
-    wandb.init(project='supervise')
+    batch_size = 2048
     dataset = PokerDataset('/home/clouduser/zcc/Agent')
     train_dataset, valid_dataset = random_split(dataset, [0.9, 0.1])
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     # valid_loader = DataLoader(valid_dataset, batch_size=batch_size, shuffle=False)
 
-    model = nn.DataParallel(HUNLSuperviseResnet()).to('cuda')
+    # model = nn.DataParallel(HUNLSuperviseOneHot50()).to('cuda')
+    model = HUNLSuperviseOneHot50()
+    model.load_state_dict(torch.load('./checkpoint/supervise/one_hot_50_v1/supervise.pt'))
+    model = nn.DataParallel(model).to('cuda')
 
-    # model = HUNLSuperviseResnet()
-    # model.load_state_dict(torch.load('./checkpoint/supervise/supervise.pt'))
-    # model = nn.DataParallel(model).to('cuda')
-
-    optimizer = optim.Adam(model.parameters(), lr = 0.001)
-    # optimizer = optim.Adam(model.parameters(), lr = 0.002)
-    # scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode="min", factor=0.5, patience=4, threshold=0.01)
-    criterion = nn.MSELoss().to('cuda')
+    optimizer = optim.Adam(model.parameters(), lr = 0.000005)
+    criterion = nn.CrossEntropyLoss().to('cuda')
     min_loss = 100
 
     # print('Origin validation:', validate(model, valid_loader))
 
     # validate(model, train_loader)
+    # print(dataset[0])
+    # exit(0)
+    save_dir = './checkpoint/supervise/one_hot_50_v2/'
+    os.makedirs(save_dir, exist_ok=True)
 
+    wandb.init(project='one_hot')
     for epoch in range(10000000):
         model.train()
         train_loss = 0
         for data, target in tqdm(train_loader):
             cards = data[:, :208].reshape(-1, 4, 4, 13).to('cuda')
             action_history = data[:,208:].reshape(-1, 4, 12, 5).to('cuda')
-            target = target.flatten(1).to('cuda')
+            # target = target.flatten(1).to('cuda')
+            target = target.to('cuda')
             output = model(cards, action_history)
             loss = criterion(output, target)
             train_loss += loss.item()
@@ -229,7 +232,7 @@ def train():
         })
         if train_loss < min_loss:
             min_loss = train_loss
-            torch.save(model.module.state_dict(), './checkpoint/supervise/run2/supervise.pt')
+            torch.save(model.module.state_dict(), save_dir + '/supervise.pt')
         if epoch % 100 == 0:
-            torch.save(model.module.state_dict(), './checkpoint/supervise/run2/supervise_c_' + str(epoch) + '.pt')
+            torch.save(model.module.state_dict(), save_dir + '/supervise_c_' + str(epoch) + '.pt')
     wandb.finish()

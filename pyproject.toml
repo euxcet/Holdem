@@ -40,5 +40,8 @@ train = {call = "alphaholdem.train:main"}
 server = {call = "alphaholdem.server:start_server"}
 client = {call = "alphaholdem.server.console_client:main"}
 supervise = {call = "alphaholdem.supervise.train:train"}
+one_hot = {call = "alphaholdem.supervise.train_one_hot:train"}
+one_hot_v1 = {call = "alphaholdem.supervise.train_one_hot_v1:train"}
+small = {call = "alphaholdem.supervise.train_small:train"}
 web = {call = "alphaholdem.solver.main:main"}
 fast = {call = "alphaholdem.supervise.train_fast:train"}

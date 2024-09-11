@@ -1,4 +1,3 @@
-import time
 import random
 import os
 import numpy as np
@@ -14,10 +13,14 @@ from torch.nn.parallel import DistributedDataParallel
 from torchmetrics.regression import MeanSquaredError
 from ..poker.component.card import Card
 from ..model.hunl_supervise_model import HUNLSuperviseModel
+from ..model.hunl_supervise_small_model import HUNLSuperviseSmallModel
 from ..model.hunl_supervise_resnet import HUNLSuperviseResnet
+from ..model.hunl_supervise_resnet import HUNLSuperviseResnet50
 
 class PokerDataset(Dataset):
-    def __init__(self, folder: str, length: int) -> None:
+    def __init__(self, folder: str) -> None:
+        # self._export(folder)
+        # exit(0)
         self.hole_cards_mapping: list[tuple[Card, Card]] = []
         for i in range(52):
             for j in range(i):
@@ -26,8 +29,11 @@ class PokerDataset(Dataset):
         self.raw_xs, self.raw_ys = self._load(folder)
         self.raw_ys = self.raw_ys.transpose((0, 2, 1))
         self.lines = self.raw_xs.shape[0]
-        self.length = length
-        self.data = [self._add_hole_cards(random.randint(0, self.lines - 1), random.randint(0, 1325)) for _ in range(self.length)]
+        # self.xs, self.ys = self._to_hole_cards_input(self.raw_xs, self.raw_ys)
+        print(self.raw_xs.shape, self.raw_ys.shape)
+        # print(self.xs.shape, self.ys.shape)
+        self.length = self.raw_xs.shape[0] * self.raw_ys.shape[1]
+        print(self.length)
 
     def _add_hole_cards(self, line_id: int, hole_id: int) -> tuple[np.ndarray, np.ndarray]:
         hole = self.hole_cards_mapping[hole_id]
@@ -38,7 +44,8 @@ class PokerDataset(Dataset):
         cards = data[:156].reshape(3, 4, 13)
         action_history = data[156:].reshape(4, 12, 5)
         cards = np.concatenate((hole_cards, cards))
-        return np.concatenate((cards.flatten(), action_history.flatten())), self.raw_ys[line_id][hole_id]
+        return np.concatenate((cards.flatten(), action_history.flatten())), np.argmax(self.raw_ys[line_id][hole_id])
+        # return np.concatenate((cards.flatten(), action_history.flatten())), self.raw_ys[line_id][hole_id]
 
     def _to_hole_cards_input(self, raw_xs: np.ndarray, raw_ys: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         xs = []
@@ -46,9 +53,8 @@ class PokerDataset(Dataset):
         for line_id in range(raw_xs.shape[0]):
             for hole_id in range(raw_ys.shape[1]):
                 x, y = self._add_hole_cards(line_id, hole_id)
-                xs.append(x, y)
-            if line_id == 100:
-                break
+                xs.append(x)
+                ys.append(y)
         return np.array(xs), np.array(ys)
 
     def _load(self, folder: str) -> tuple[np.ndarray, np.ndarray]:
@@ -66,11 +72,14 @@ class PokerDataset(Dataset):
                     ys = np.concatenate((ys, np.load(os.path.join(folder, name))))
             if xs is not None and ys is not None:
                 break
+        xs, index = np.unique(xs, axis=0, return_index=True)
+        ys = ys[index]
         return xs.astype(np.float32), ys.astype(np.float32)
 
     def _export(self, folder: str) -> None:
         for name in os.listdir(folder):
             if name.endswith('.txt'):
+                print('Export', name)
                 xs = []
                 ys = []
                 history = None
@@ -90,10 +99,8 @@ class PokerDataset(Dataset):
                                 elif len(strategy) == 3:
                                     strategy.insert(2, np.zeros((1326,), dtype=np.float32))
                                 elif len(strategy) != 4:
-                                    print(history, len(history))
                                     assert False
                                 ys.append(strategy)
-                                print(len(xs))
                                 strategy = []
                             history = line[3:-3]
                         else:
@@ -124,7 +131,7 @@ class PokerDataset(Dataset):
         current_player = 0
         street = 0
         max_num_actions_street = 6
-        in_aciton_history = np.zeros((4, 12, 5), dtype=np.float32)
+        in_action_history = np.zeros((4, 12, 5), dtype=np.float32)
         is_all_in = False
         for street_actions in action_history.split('/'):
             num_action = [0, 0]
@@ -135,93 +142,106 @@ class PokerDataset(Dataset):
             for i in range(len(street_actions)):
                 if street_actions[i] == 'c':
                     if is_all_in:
-                        in_aciton_history[street][current_player * max_num_actions_street + num_action[current_player]][4] = 1
+                        in_action_history[street][current_player * max_num_actions_street + num_action[current_player]][4] = 1
                     elif is_check:
-                        in_aciton_history[street][current_player * max_num_actions_street + num_action[current_player]][1] = 1
+                        in_action_history[street][current_player * max_num_actions_street + num_action[current_player]][1] = 1
                     else:
                         if street == 0:
                             is_check = True
-                        in_aciton_history[street][current_player * max_num_actions_street + num_action[current_player]][2] = 1
+                        in_action_history[street][current_player * max_num_actions_street + num_action[current_player]][2] = 1
                     num_action[current_player] += 1
                     current_player = 1 - current_player
                 if street_actions[i] == 'r':
                     is_check = False
                     if street_actions[i + 1:].startswith('20000'): # all in
-                        in_aciton_history[street][current_player * max_num_actions_street + num_action[current_player]][4] = 1
+                        in_action_history[street][current_player * max_num_actions_street + num_action[current_player]][4] = 1
                         is_all_in = True
                     else:
-                        in_aciton_history[street][current_player * max_num_actions_street + num_action[current_player]][3] = 1
+                        in_action_history[street][current_player * max_num_actions_street + num_action[current_player]][3] = 1
                     num_action[current_player] += 1
                     current_player = 1 - current_player
             current_player = 1
             street += 1
 
-        in_tensor = np.concatenate((in_cards.flatten(), in_aciton_history.flatten()))
+        in_tensor = np.concatenate((in_cards.flatten(), in_action_history.flatten()))
         return in_tensor
 
     def __len__(self):
         return self.length
+        # return self.xs.shape[0]
 
     def __getitem__(self, index: int):
-        return self.data[index]
+        return self._add_hole_cards(index // 1326, index % 1326)
+        # return self._add_hole_cards(random.randint(0, self.lines - 1), random.randint(0, 1325))
+        # return self.xs[index], self.ys[index]
 
-def validate(model, valid_loader):
+def validate(model, loader):
     model.eval()
     mean_square_error = MeanSquaredError().to('cuda')
     mse = 0
-    for data, target in tqdm(valid_loader):
+    for data, target in tqdm(loader):
         cards = data[:, :208].reshape(-1, 4, 4, 13).to('cuda')
         action_history = data[:, 208:].reshape(-1, 4, 12, 5).to('cuda')
         target = target.flatten(1).to('cuda')
         output = model(cards, action_history)
         mse += mean_square_error(output, target)
-    return mse / len(valid_loader)
+    return mse / len(loader)
 
 def train():
-    batch_size = 16384
-    wandb.init(project='supervise')
+    batch_size = 4096 * 16
+    train_dataset = PokerDataset('/home/clouduser/zcc/Agent')
+    # dataset = PokerDataset('/home/clouduser/zcc/Agent')
+    # train_dataset, valid_dataset = random_split(dataset, [0.9, 0.1])
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=False)
     # valid_loader = DataLoader(valid_dataset, batch_size=batch_size, shuffle=False)
 
-    # model = HUNLSuperviseResnet()
-    # model.load_state_dict(torch.load('./checkpoint/supervise/supervise.pt'))
+    model = nn.DataParallel(HUNLSuperviseResnet()).to('cuda')
+
+    # model = HUNLSuperviseResnet50()
+    # model.load_state_dict(torch.load('./checkpoint/supervise/small/supervise.pt'))
     # model = nn.DataParallel(model).to('cuda')
 
-    model = nn.DataParallel(HUNLSuperviseResnet()).to('cuda')
-    optimizer = optim.Adam(model.parameters(), lr = 0.001)
+    optimizer = optim.Adam(model.parameters(), lr = 0.0005)
     # optimizer = optim.Adam(model.parameters(), lr = 0.002)
-    # scheduler = optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.9995)
-    criterion = nn.MSELoss().to('cuda')
-    min_loss = 100
+    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.8)
+    # scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode="min", factor=0.5, patience=4, threshold=0.01)
+    # criterion = nn.MSELoss().to('cuda')
+    criterion = nn.CrossEntropyLoss().to('cuda')
+    min_loss = 100000.0
+
     # print('Origin validation:', validate(model, valid_loader))
+
+    # validate(model, train_loader)
+
+    save_dir = './checkpoint/supervise/small_v1/'
+    os.makedirs(save_dir, exist_ok=True)
+    wandb.init(project='supervise_small')
+
     for epoch in range(10000000):
-        t0 = time.time()
-        dataset = PokerDataset('/home/clouduser/zcc/Agent', 1000000)
-        train_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=16, pin_memory=True)
-        t1 = time.time()
-        print("Prepare data time:", t1 - t0)
         model.train()
         train_loss = 0
         for data, target in tqdm(train_loader):
             cards = data[:, :208].reshape(-1, 4, 4, 13).to('cuda')
             action_history = data[:,208:].reshape(-1, 4, 12, 5).to('cuda')
-            target = target.flatten(1).to('cuda')
+            # target = target.flatten(1).to('cuda')
+            target = target.to('cuda')
             output = model(cards, action_history)
             loss = criterion(output, target)
             train_loss += loss.item()
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-        # scheduler.step()
-        print('Epoch:', epoch, 'Loss:', train_loss / len(train_loader) * 100)
+        scheduler.step()
+        train_loss = train_loss / len(train_loader) * 100
+        print('Epoch:', epoch, 'Loss:', train_loss)
         wandb.log({
             'epoch': epoch,
-            'loss': train_loss / len(train_loader) * 100,
+            'loss': train_loss,
             'lr': optimizer.param_groups[0]['lr'],
         })
         if train_loss < min_loss:
             min_loss = train_loss
-            torch.save(model.module.state_dict(), './checkpoint/supervise/fast/supervise.pt')
+            torch.save(model.module.state_dict(), save_dir + '/supervise.pt')
         if epoch % 100 == 0:
-            torch.save(model.module.state_dict(), './checkpoint/supervise/fast/supervise_c_' + str(epoch) + '.pt')
-        t2 = time.time()
-        print("Train time:", t2 - t1)
+            torch.save(model.module.state_dict(), save_dir + '/supervise_c_' + str(epoch) + '.pt')
+    wandb.finish()

@@ -190,12 +190,16 @@ class ResNet(nn.Module):
         return self._forward_impl(x)
 
 
-class HUNLSuperviseResnet(nn.Module):
+class HUNLSuperviseOneHot(nn.Module):
     def __init__(self):
         nn.Module.__init__(self)
+        self.conv1 = nn.Conv2d(4, 64, kernel_size=3, stride=2, padding=1, bias=False)
+        self.bn1 = nn.BatchNorm2d(64)
+        self.relu = nn.ReLU(inplace=True)
+        self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
+
         self.card_net = ResNet(BasicBlock, [2, 2, 2, 2], num_classes=128)
         self.action_net = ResNet(BasicBlock, [2, 2, 2, 2], num_classes=128)
-        # fold check/call raise all_in
         self.policy_fn = nn.Sequential(
             nn.Linear(256, 64),
             nn.ReLU(),
@@ -209,13 +213,16 @@ class HUNLSuperviseResnet(nn.Module):
         out = self.policy_fn(out)
         return out
 
-
-class HUNLSuperviseResnet50(nn.Module):
+class HUNLSuperviseOneHot50(nn.Module):
     def __init__(self):
         nn.Module.__init__(self)
+        self.conv1 = nn.Conv2d(4, 64, kernel_size=3, stride=2, padding=1, bias=False)
+        self.bn1 = nn.BatchNorm2d(64)
+        self.relu = nn.ReLU(inplace=True)
+        self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
+
         self.card_net = ResNet(BasicBlock, [3, 4, 6, 3], num_classes=128)
         self.action_net = ResNet(BasicBlock, [3, 4, 6, 3], num_classes=128)
-        # fold check/call raise all_in
         self.policy_fn = nn.Sequential(
             nn.Linear(256, 64),
             nn.ReLU(),

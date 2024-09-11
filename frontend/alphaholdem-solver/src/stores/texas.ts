@@ -86,7 +86,7 @@ export const useTexasStore = defineStore('texas', {
             this.detail_policy = this.empty_detail_policy()
             this.action_history = []
             this.policy_history = []
-            this.board_cards = ['6s', '5c', 'Qd', '4s', '3d']
+            this.board_cards = ['Qh', '3h', 'As', '3s', 'Qs']
             let response = await this.get_policy()
             this.num_actions = response.policy[0].length
             this.policy_history.push(response.policy)
@@ -147,13 +147,29 @@ export const useTexasStore = defineStore('texas', {
             }
             this.policy_prior.push(new_prior)
             let response = await this.get_policy()
+
             if (!response.observation.is_over) {
                 this.policy_history.push(this.smooth_policy(response.policy))
                 this.observation_history.push(response.observation)
                 this.current_step = step + 1
+                let current_prior = this.get_last_policy_prior(this.current_step)
+
+                // Remove combos that conflict with the board
+                for (let card of response.observation.board_cards) {
+                    var count = 0
+                    for (var card0 = 0; card0 < 52; card0++) {
+                        for (var card1 = card0 + 1; card1 < 52; card1++) {
+                            if (card.suit_first_id == card0 || card.suit_first_id == card1) {
+                                current_prior[count] = 0
+                            }
+                            count += 1
+                        }
+                    }
+                }
+
                 this.overall_policy = this.calc_overall_policy(
                     this.policy_history[this.current_step],
-                    this.get_last_policy_prior(this.current_step),)
+                    current_prior,)
             } else {
                 showNotify('Game over!')
             }

@@ -29,8 +29,8 @@ class HunlArena():
     ) -> tuple[float, float]:
         env: NoLimitTexasHoldemEnv = create_no_limit_holdem_env()
         result = []
-        for run in range(0, runs, 2):
-        # for run in range(runs):
+        # for run in range(0, runs, 2):
+        for run in range(runs):
             # print('run =', run)
             env.reset()
             while not env.is_over():

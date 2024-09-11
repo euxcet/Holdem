@@ -12,7 +12,8 @@ class TestSupervise():
             for j in range(i):
                 self.hole_cards_mapping.append((Card(rank_first_id=i), Card(rank_first_id=j)))
         print()
-        with open('/home/clouduser/zcc/Agent/1724729416219.txt', 'r') as f:
+        # with open('/home/clouduser/zcc/Agent/1724729416219.txt', 'r') as f:
+        with open('/home/clouduser/zcc/Holdem/strategy/bug.txt', 'r') as f:
             line = f.readline()
             while True:
                 print(line)
@@ -45,3 +46,33 @@ class TestSupervise():
                         print(hand  + "|" + ",".join(map(lambda x: '%.2f'%x, table[i][j])), end = ' ')
                     print()
                 _ = input()
+
+
+
+# BUG!
+# [[Td, 3d], [Jh, 2c]]
+# player=BB pot=181.0BB chips=181.0BB current_player=BB
+# Hole cards: [Jh, 2c]   Board cards: [Qh, 3h, As, 3s, Qs]
+# Action Log:
+# [Action] player=SB street=Street.Preflop action=ActionType.Call
+#          raise_chip=0.0BB        raise_pot=0%    raise_to=0.0BB
+# [Action] player=BB street=Street.Preflop action=ActionType.Raise
+#          raise_chip=2.0BB        raise_pot=100%          raise_to=3.0BB
+# [Action] player=SB street=Street.Preflop action=ActionType.Call
+#          raise_chip=0.0BB        raise_pot=0%    raise_to=0.0BB
+# [Action] player=BB street=Street.Flop action=ActionType.Raise
+#          raise_chip=6.0BB        raise_pot=100%          raise_to=6.0BB
+# [Action] player=SB street=Street.Flop action=ActionType.Call
+#          raise_chip=0.0BB        raise_pot=0%    raise_to=0.0BB
+# [Action] player=BB street=Street.Turn action=ActionType.Raise
+#          raise_chip=18.0BB       raise_pot=100%          raise_to=18.0BB
+# [Action] player=SB street=Street.Turn action=ActionType.Raise
+#          raise_chip=72.0BB       raise_pot=100%          raise_to=72.0BB
+# [Action] player=BB street=Street.Turn action=ActionType.Call
+#          raise_chip=0.0BB        raise_pot=0%    raise_to=0.0BB
+# [Action] player=BB street=Street.River action=ActionType.All_in
+#          raise_chip=0.0BB        raise_pot=0%    raise_to=0.0BB
+# [Action] player=SB street=Street.River action=ActionType.Fold
+#          raise_chip=0.0BB        raise_pot=0%    raise_to=0.0BB
+# payoff = [-81.0, 81.0]
+#  [-0.81, 0.81]
