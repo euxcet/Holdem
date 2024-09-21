@@ -34,9 +34,9 @@
 
 <script setup lang="ts">
 
-import { useTexasStore } from '@/stores/texas'
+import { useDeepStackStore } from '@/stores/deepstack'
 import { storeToRefs } from 'pinia'
-const texasStore = useTexasStore()
+const deepstackStore = useDeepStackStore()
 
 const {
     action_history,
@@ -45,37 +45,35 @@ const {
     board_cards,
     current_step,
     highlight_action,
-} = storeToRefs(texasStore)
+} = storeToRefs(deepstackStore)
 
 function actionMouseOver(obsIndex: number, actionIndex: number) {
-    if (obsIndex == texasStore.current_step) {
-        texasStore.highlight_action = actionIndex
+    if (obsIndex == deepstackStore.current_step) {
+        deepstackStore.highlight_action = actionIndex
     }
 }
 
 function actionMouseLeave(obsIndex: number, actionIndex: number) {
-    if (actionIndex == texasStore.highlight_action) {
-        texasStore.highlight_action = -1
+    if (actionIndex == deepstackStore.highlight_action) {
+        deepstackStore.highlight_action = -1
     }
 }
 
 async function perform_action(obsIndex: number, actionIndex: number) {
-    await texasStore.perform_action(obsIndex, actionIndex)
+    await deepstackStore.perform_action(obsIndex, actionIndex)
 }
 
 async function switch_obs(obsIndex: number) {
-    texasStore.switch_obs(obsIndex)
+    deepstackStore.switch_obs(obsIndex)
 }
 
 function format_legal_actions(observation) {
     let result = []
     let actions = observation.legal_actions
-    // let action_name = ["Fold", "Check", "Call", "All in", "Raise 25%", "Raise 50%", "Raise 75%", "Raise 125%"]
-    // TODO: get action names from the observation
-    let action_name = ["Fold", "Check", "Call", "All in", "Raise 100%"]
+    let action_name = [[0, "Fold"], [1, "Check"], [1, "Call"], [3, "All in"], [2, "Raise 100%"]]
     for (var i = 0; i < actions.length; i++) {
         if (actions[i] != null) {
-            result.push([i, action_name[i]])
+            result.push(action_name[i])
         }
     }
     return result

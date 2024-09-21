@@ -13,7 +13,7 @@ from ....model.hunl_supervise_resnet import HUNLSuperviseResnet
 
 class DeepstackHunlPolicy(Policy):
     def __init__(self, model_path: str = None, device: str = 'cuda') -> None:
-        self.model = HUNLSuperviseResnet()
+        self.model = HUNLSuperviseModel()
         self.model.load_state_dict(torch.load(model_path))
         self.model.to('cuda')
         self.model.eval()

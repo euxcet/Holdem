@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { SolverService } from '@/api/api'
 import { showNotify } from 'vant'
 
-export const useTexasStore = defineStore('texas', {
+export const useDeepStackStore = defineStore('texas', {
     state: () => {
         return {
             // when need to select an action at step s, starting from 0.
@@ -71,10 +71,14 @@ export const useTexasStore = defineStore('texas', {
         },
 
         async get_policy(): dict {
-            let response = (await SolverService.getPolicy({
-                "action_history": this.action_history,
-                "board_cards": this.board_cards,
+            let response = (await SolverService.getDeepStackPolicy({
+                "game": 0,
+                "step": this.action_history.length,
             })).data
+            this.board_cards = []
+            for (let card of response.observation.board_cards) {
+                this.board_cards.push(this.card_to_str(card.rank, card.suit))
+            }
             return response
         },
 
@@ -86,7 +90,7 @@ export const useTexasStore = defineStore('texas', {
             this.detail_policy = this.empty_detail_policy()
             this.action_history = []
             this.policy_history = []
-            this.board_cards = ['Qh', '3h', 'As', '3s', 'Qs']
+            this.board_cards = []
             let response = await this.get_policy()
             this.num_actions = response.policy[0].length
             this.policy_history.push(response.policy)
@@ -190,11 +194,12 @@ export const useTexasStore = defineStore('texas', {
             let current = 0
             let count = 0
             for (var card0 = 0; card0 < 52; card0++) {
-                for (var card1 = card0 + 1; card1 < 52; card1++) {
-                    let suit0 = Math.floor(card0 / 13)
-                    let rank0 = card0 % 13
-                    let suit1 = Math.floor(card1 / 13)
-                    let rank1 = card1 % 13
+                for (var card1 = 0; card1 < card0; card1++) {
+                    let rank0 = Math.floor(card0 / 4)
+                    let suit0 = card0 % 4
+                    let rank1 = Math.floor(card1 / 4)
+                    let suit1 = card1 % 4
+
                     if (suit0 == suit1) { // suited, div 4
                         if (rank0 < rank1) {
                             [rank0, rank1] = [rank1, rank0];
@@ -243,11 +248,12 @@ export const useTexasStore = defineStore('texas', {
             let policy = this.empty_overall_policy()
             let current = 0
             for (var card0 = 0; card0 < 52; card0++) {
-                for (var card1 = card0 + 1; card1 < 52; card1++) {
-                    let suit0 = Math.floor(card0 / 13)
-                    let rank0 = card0 % 13
-                    let suit1 = Math.floor(card1 / 13)
-                    let rank1 = card1 % 13
+                for (var card1 = 0; card1 < card0; card1++) {
+                    let rank0 = Math.floor(card0 / 4)
+                    let suit0 = card0 % 4
+                    let rank1 = Math.floor(card1 / 4)
+                    let suit1 = card1 % 4
+
                     let ratio = 0.0
                     if (rank0 == rank1) { // pair, div 6
                         ratio = 1.0 / 6.0
