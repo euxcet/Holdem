@@ -1,6 +1,7 @@
 import torch
 import numpy as np
 from ..model.hunl_conv_model import HUNLConvModel
+from ..model.hunl_supervise_model import HUNLSuperviseModel
 from ..model.hunl_supervise_resnet import HUNLSuperviseResnet
 from ..poker.no_limit_texas_holdem_env import NoLimitTexasHoldemEnv
 from ..poker.component.card import Card
@@ -14,7 +15,8 @@ class Solver():
         showdown_street: Street,
     ) -> None:
         # self.model: HUNLConvModel = torch.load(model_path)
-        self.model: HUNLSuperviseResnet = HUNLSuperviseResnet()
+        # self.model: HUNLSuperviseResnet = HUNLSuperviseResnet()
+        self.model: HUNLSuperviseModel = HUNLSuperviseModel()
         self.model.load_state_dict(torch.load(model_path))
         self.model.to('cuda')
         self.model.eval()

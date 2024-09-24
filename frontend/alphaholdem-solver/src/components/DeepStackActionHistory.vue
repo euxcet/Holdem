@@ -1,4 +1,7 @@
 <template>
+    <div class="game-container">
+        <span> 记录编号：{{ game_id }} / {{ num_games }} </span>
+    </div>
     <div class="board-card-row">
         <div class="board-card-container" v-for="cardIndex in [0, 1, 2, 3, 4]">
             <div v-if="cardIndex < board_cards.length" class="board-card" :class="'board-card-' + board_cards[cardIndex][1]">
@@ -45,6 +48,8 @@ const {
     board_cards,
     current_step,
     highlight_action,
+    num_games,
+    game_id,
 } = storeToRefs(deepstackStore)
 
 function actionMouseOver(obsIndex: number, actionIndex: number) {
@@ -82,6 +87,12 @@ function format_legal_actions(observation) {
 </script>
 
 <style scope>
+.game-container {
+    margin-bottom: 10px;
+    color: white;
+    font-weight: bold;
+}
+
 .observation-row {
     width: 100%;
     height: 130px;

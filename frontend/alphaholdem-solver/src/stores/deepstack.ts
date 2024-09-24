@@ -20,6 +20,8 @@ export const useDeepStackStore = defineStore('texas', {
             highlight_action: -1,
             running: false,
             num_actions: 0,
+            num_games: 0,
+            game_id: 0,
         }
     },
     actions: {
@@ -72,7 +74,7 @@ export const useDeepStackStore = defineStore('texas', {
 
         async get_policy(): dict {
             let response = (await SolverService.getDeepStackPolicy({
-                "game": 0,
+                "game": this.game_id,
                 "step": this.action_history.length,
             })).data
             this.board_cards = []
@@ -82,8 +84,16 @@ export const useDeepStackStore = defineStore('texas', {
             return response
         },
 
-        async reset() {
+        async reset(game_id) {
+            game_id = parseInt(game_id)
+            console.log(game_id)
             // policy_history.length == observation_history.length == action_history.length + 1 == max_step + 1
+            this.num_games = (await SolverService.getDeepStackNumGames()).data.num
+            if (!isNaN(game_id)) {
+                this.game_id = Math.min(Math.max(game_id, 0), this.num_games - 1)
+            } else {
+                this.game_id = Math.floor(Math.random() * (this.num_games + 1))
+            }
             this.overall_cell_name = this.get_overall_cell_name()
             this.overall_policy = this.empty_overall_policy()
             this.detail_cell_name = Array.from({ length: 3 }, () => Array(4).fill(""))
@@ -162,8 +172,8 @@ export const useDeepStackStore = defineStore('texas', {
                 for (let card of response.observation.board_cards) {
                     var count = 0
                     for (var card0 = 0; card0 < 52; card0++) {
-                        for (var card1 = card0 + 1; card1 < 52; card1++) {
-                            if (card.suit_first_id == card0 || card.suit_first_id == card1) {
+                        for (var card1 = 0; card1 < card0; card1++) {
+                            if (card.rank_first_id == card0 || card.rank_first_id == card1) {
                                 current_prior[count] = 0
                             }
                             count += 1

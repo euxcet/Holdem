@@ -78,6 +78,9 @@ async def get_policy(query: PolicyQuery):
     ) 
     return pretty_floats({"policy": policy.tolist(), "observation": observation})
 
+@app.get("/deepstack_num_games")
+def get_deepstack_num_games():
+    return {'num': deepstack_dataset.num_games()}
 
 @app.post("/deepstack_policy")
 def get_deepstack_policy(query: DeepstackQuery):
@@ -89,13 +92,4 @@ def get_deepstack_policy(query: DeepstackQuery):
     return pretty_floats({"policy": policy,  "observation": observation})
 
 def main():
-    # game_id = 0
-    # game: DeepStackGame = deepstack_dataset.games[game_id]
-    # print('step', game.num_steps())
-    # for step_id in range(game.num_steps()):
-    #     policy = game.get_policy(step_id).tolist()
-    #     observation = game.get_observation(step_id)
-    #     print(observation)
-    #     print()
-
     uvicorn.run(app='alphaholdem.solver.main:app', host='0.0.0.0', port=18889, reload=True)

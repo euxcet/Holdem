@@ -97,6 +97,9 @@ class DeepStackDataset():
         self.xs, self.ys = self.load(folder)
         self.games = self.split()
 
+    def num_games(self) -> int:
+        return len(self.games)
+
     def load(self, folder: str = None) -> tuple[np.ndarray, np.ndarray]:
         folder = self.folder if folder is None else folder
         xs = []
@@ -124,8 +127,8 @@ class DeepStackDataset():
                                     assert False
                                 ys.append(strategy)
                                 strategy = []
-                                if len(xs) == 10:
-                                    break
+                                # if len(xs) == 200:
+                                #     break
                             history = line[3:-3]
                         else:
                             strategy.append(list(map(lambda x: float(x), line.strip().split(' '))))

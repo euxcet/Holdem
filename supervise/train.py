@@ -40,10 +40,11 @@ class DeepStackDataModule(LightningDataModule):
 class DeepStackModule(LightningModule):
     def __init__(self):
         super().__init__()
-        self.model = HUNLSuperviseModel()
+        # self.model = HUNLSuperviseModel()
+        self.model = HUNLSuperviseResnet()
         # self.criterion = nn.CrossEntropyLoss()
         self.criterion = nn.MSELoss()
-        self.lr = 1e-5
+        self.lr = 1e-4
 
     def training_step(self, batch):
         x, y = batch
@@ -79,7 +80,7 @@ if __name__ == '__main__':
     )
     trainer = Trainer(
         accelerator='gpu',
-        devices=4,
+        devices=2,
         max_epochs=-1,
         logger=wandb_logger,
         callbacks=[ ModelCheckpoint(every_n_epochs=1, save_top_k=1, monitor='train_loss'), ],

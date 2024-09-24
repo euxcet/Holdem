@@ -1,6 +1,10 @@
 import { request } from './axios'
 
 export class SolverService {
+  static async getDeepStackNumGames(params) {
+    return request('/deepstack_num_games', params, 'get', 'json')
+  }
+
   static async getPolicy(params) {
     return request('/policy', params, 'post', 'json')
   }

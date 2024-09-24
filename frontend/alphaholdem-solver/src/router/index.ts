@@ -6,7 +6,12 @@ const router = createRouter({
     {
       path: '/deepstack',
       name: 'deepstack',
-      component: () => import('../views/DeepStackView.vue')
+      component: () => import('../views/DeepStackView.vue'),
+    },
+    {
+      path: '/deepstack/:id',
+      name: 'deepstack_id',
+      component: () => import('../views/DeepStackView.vue'),
     },
     {
       path: '/',

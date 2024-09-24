@@ -36,10 +36,13 @@
 
 <script setup lang="ts">
 
+import { useRoute } from 'vue-router'
 import { useDeepStackStore } from '@/stores/deepstack'
 import { storeToRefs } from 'pinia'
+
+const route = useRoute()
 const deepstackStore = useDeepStackStore()
-deepstackStore.reset()
+deepstackStore.reset(route.params.id)
 
 const {
     action_history,
