@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { SolverService } from '@/api/api'
 import { showNotify } from 'vant'
 
-export const useDeepStackStore = defineStore('texas', {
+export const useRangeStore = defineStore('range', {
     state: () => {
         return {
             // when need to select an action at step s, starting from 0.
@@ -20,8 +20,6 @@ export const useDeepStackStore = defineStore('texas', {
             highlight_action: -1,
             running: false,
             num_actions: 0,
-            num_games: 0,
-            game_id: 0,
         }
     },
     actions: {
@@ -73,34 +71,22 @@ export const useDeepStackStore = defineStore('texas', {
         },
 
         async get_policy(): dict {
-            let response = (await SolverService.getDeepStackPolicy({
-                "game": this.game_id,
-                "step": this.action_history.length,
+            let response = (await SolverService.getRangePolicy({
+                "action_history": this.action_history,
+                "board_cards": this.board_cards,
             })).data
-            this.board_cards = []
-            for (let card of response.observation.board_cards) {
-                this.board_cards.push(this.card_to_str(card.rank, card.suit))
-            }
             return response
         },
 
-        async reset(game_id) {
-            game_id = parseInt(game_id)
-            console.log(game_id)
+        async reset() {
             // policy_history.length == observation_history.length == action_history.length + 1 == max_step + 1
-            this.num_games = (await SolverService.getDeepStackNumGames()).data.num
-            if (!isNaN(game_id)) {
-                this.game_id = Math.min(Math.max(game_id, 0), this.num_games - 1)
-            } else {
-                this.game_id = Math.floor(Math.random() * (this.num_games + 1))
-            }
             this.overall_cell_name = this.get_overall_cell_name()
             this.overall_policy = this.empty_overall_policy()
             this.detail_cell_name = Array.from({ length: 3 }, () => Array(4).fill(""))
             this.detail_policy = this.empty_detail_policy()
             this.action_history = []
             this.policy_history = []
-            this.board_cards = []
+            this.board_cards = ['5c', 'Td', '4h', '7c', 'Ks']
             let response = await this.get_policy()
             this.num_actions = response.policy[0].length
             this.policy_history.push(response.policy)
@@ -173,7 +159,7 @@ export const useDeepStackStore = defineStore('texas', {
                     var count = 0
                     for (var card0 = 0; card0 < 52; card0++) {
                         for (var card1 = 0; card1 < card0; card1++) {
-                            if (card.rank_first_id == card0 || card.rank_first_id == card1) {
+                            if (card.suit_first_id == card0 || card.suit_first_id == card1) {
                                 current_prior[count] = 0
                             }
                             count += 1

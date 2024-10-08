@@ -105,7 +105,8 @@ class DeepStackDataset():
         xs = []
         ys = []
         for name in os.listdir(folder):
-            if name.endswith('.txt'):
+            if name == "1724729466679.txt":
+            # if name.endswith('.txt'):
                 print('Load', name)
                 history = None
                 strategy = []
@@ -127,8 +128,8 @@ class DeepStackDataset():
                                     assert False
                                 ys.append(strategy)
                                 strategy = []
-                                # if len(xs) == 200:
-                                #     break
+                                if len(xs) >= 200:
+                                    break
                             history = line[3:-3]
                         else:
                             strategy.append(list(map(lambda x: float(x), line.strip().split(' '))))

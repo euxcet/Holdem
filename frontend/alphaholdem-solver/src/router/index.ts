@@ -4,6 +4,11 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
+      path: '/range',
+      name: 'range',
+      component: () => import('../views/RangeView.vue'),
+    },
+    {
       path: '/deepstack',
       name: 'deepstack',
       component: () => import('../views/DeepStackView.vue'),

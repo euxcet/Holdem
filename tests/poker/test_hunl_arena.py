@@ -17,7 +17,8 @@ class TestHunlArena():
                 for key, value in checkpoint['state_dict'].items():
                     new_key = key.replace('model.', '')
                     state_dict[new_key] = value
-                save_path = os.path.join(folder, ckpt[:-4] + 'pt')
+                save_path = "/home/clouduser/zcc/Holdem/checkpoint/showdown/range_model.pt"
+                # save_path = os.path.join(folder, ckpt[:-4] + 'pt')
                 torch.save(state_dict, save_path)
                 return save_path
 
@@ -27,12 +28,20 @@ class TestHunlArena():
         # tf = TFTexasPolicy('/home/clouduser/zcc/checkpoint/38000_model/model.ckpt')
         # arena = HunlArena('./checkpoint/supervise/small_v1/supervise.pt')
         random = RandomPolicy()
-        pt = self.extract_pt('/home/clouduser/zcc/Holdem/supervise/wandb/supervise/24v9tqba/checkpoints')
-        arena = HunlArena(pt)
-        mean, var = arena.policy_vs_policy(
-            policy0=arena.nash,
-            policy1=random,
-            runs=4096,
-        )
-        print('Result:', mean)
+
+        root = '/home/clouduser/zcc/Holdem/supervise/wandb/supervise/'
+        folders = [f for f in os.listdir(root) if os.path.isdir(os.path.join(root, f))]
+        newest_folder = max(folders, key=lambda f: os.path.getctime(os.path.join(root, f)))
+        print(newest_folder)
+        pt = self.extract_pt(os.path.join(root, newest_folder, 'checkpoints'))
+
+        # arena = HunlArena(pt)
+        # mean, var = arena.policy_vs_policy(
+        #     policy0=arena.nash,
+        #     policy1=random,
+        #     runs=1024,
+        # )
+        # print('Result:', mean)
         # 6.298828124999994
+
+        # preflop: efxeejpq

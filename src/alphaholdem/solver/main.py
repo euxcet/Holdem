@@ -6,6 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from .solver import Solver
+from .range_solver import RangeSolver
 from ..poker.component.street import Street
 from .deepstack_dataset import DeepStackDataset, DeepStackGame
 
@@ -71,6 +72,18 @@ async def get_policy(query: PolicyQuery):
     solver = Solver(
         model_path=os.path.join('./checkpoint', query.solver, 'model.pt'),
         showdown_street=Street.from_str(query.street)
+    )
+    policy, observation = solver.query(
+        board_cards=query.board_cards,
+        action_history=query.action_history,
+    ) 
+    return pretty_floats({"policy": policy.tolist(), "observation": observation})
+
+@app.post("/range_policy")
+async def get_range_policy(query: PolicyQuery):
+    solver = RangeSolver(
+        model_folder=os.path.join('./checkpoint', query.solver)
+        # model_path=os.path.join('./checkpoint', query.solver, 'range_model.pt'),
     )
     policy, observation = solver.query(
         board_cards=query.board_cards,

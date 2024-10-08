@@ -1,3 +1,8 @@
+# import torch
+# from torch import nn
+
+
+
 import torch
 from torch import nn
 from torch import Tensor
@@ -76,6 +81,7 @@ class ResNet(nn.Module):
         self,
         block: BasicBlock,
         layers: list[int],
+        in_channels: int = 4,
         num_classes: int = 1000,
         zero_init_residual: bool = False,
         groups: int = 1,
@@ -101,7 +107,7 @@ class ResNet(nn.Module):
             )
         self.groups = groups
         self.base_width = width_per_group
-        self.conv1 = nn.Conv2d(4, self.inplanes, kernel_size=7, stride=2, padding=3, bias=False)
+        self.conv1 = nn.Conv2d(in_channels, self.inplanes, kernel_size=7, stride=2, padding=3, bias=False)
         # self.bn1 = norm_layer(self.inplanes)
         self.relu = nn.ReLU(inplace=True)
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
@@ -190,38 +196,46 @@ class ResNet(nn.Module):
         return self._forward_impl(x)
 
 
-class HUNLSuperviseResnet(nn.Module):
+class HUNLSuperviseRangeResnet(nn.Module):
     def __init__(self):
         nn.Module.__init__(self)
-        self.card_net = ResNet(BasicBlock, [2, 2, 2, 2], num_classes=128)
+        self.card_net = ResNet(BasicBlock, [2, 2, 2, 2], num_classes=128, in_channels=3)
         self.action_net = ResNet(BasicBlock, [2, 2, 2, 2], num_classes=128)
         # fold check/call raise all_in
         self.policy_fn = nn.Sequential(
             nn.Linear(256, 64),
             nn.ReLU(),
-            nn.Linear(64, 4),
-            nn.Softmax(dim=1),
+            nn.Linear(64, 128),
+            nn.ReLU(),
+            nn.Linear(128, 512),
+            nn.ReLU(),
+            nn.Linear(512, 5304),
         )
+        self.softmax = nn.Softmax(dim=2)
 
     def forward(self, cards, action_history):
         card_out = self.card_net(cards)
         action_out = self.action_net(action_history)
         out = torch.cat((card_out, action_out), dim=1)
-        out = self.policy_fn(out)
+        out = self.policy_fn(out).view(-1, 1326, 4)
+        out = self.softmax(out)
         return out
 
 
 class HUNLSuperviseResnet50(nn.Module):
     def __init__(self):
         nn.Module.__init__(self)
-        self.card_net = ResNet(BasicBlock, [3, 4, 6, 3], num_classes=128)
+        self.card_net = ResNet(BasicBlock, [3, 4, 6, 3], num_classes=128, in_channels=3)
         self.action_net = ResNet(BasicBlock, [3, 4, 6, 3], num_classes=128)
         # fold check/call raise all_in
         self.policy_fn = nn.Sequential(
             nn.Linear(256, 64),
             nn.ReLU(),
-            nn.Linear(64, 4),
-            nn.Softmax(dim=1),
+            nn.Linear(64, 128),
+            nn.ReLU(),
+            nn.Linear(128, 512),
+            nn.ReLU(),
+            nn.Linear(512, 5304),
         )
 
     def forward(self, cards, action_history):
@@ -229,4 +243,28 @@ class HUNLSuperviseResnet50(nn.Module):
         action_out = self.action_net(action_history)
         out = torch.cat((card_out, action_out), dim=1)
         out = self.policy_fn(out)
+        return out.view(-1, 1326, 4)
+
+class HUNLSuperviseRangeModel(nn.Module):
+    def __init__(self):
+        nn.Module.__init__(self)
+        self.net = nn.Sequential(
+            nn.Linear(396, 256),
+            nn.ReLU(),
+            nn.Linear(256, 128),
+            nn.ReLU(),
+            nn.Linear(128, 64),
+            nn.ReLU(),
+            nn.Linear(64, 128),
+            nn.ReLU(),
+            nn.Linear(128, 512),
+            nn.ReLU(),
+            nn.Linear(512, 5304),
+        )
+        self.softmax = nn.Softmax(dim=2)
+
+    def forward(self, cards, actions):
+        x = torch.cat((torch.flatten(cards, start_dim=1), torch.flatten(actions, start_dim=1)), dim=1)
+        out = self.net(x).view(-1, 1326, 4)
+        out = self.softmax(out)
         return out

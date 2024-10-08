@@ -1,12 +1,9 @@
 import os
 import time
 import numpy as np
+import random
 from alphaholdem.poker.component.card import Card
-from torch.utils.data import Dataset, IterableDataset
-
-class IterablePokerDataset(IterableDataset):
-    def __init__(self, folder: str) -> None:
-        ...
+from torch.utils.data import Dataset, IterableDataset, get_worker_info
 
 class PokerDataset(Dataset):
     def __init__(self, folder: str, do_load: bool = True) -> None:
@@ -60,111 +57,90 @@ class PokerDataset(Dataset):
                     ys = np.concatenate((ys, np.load(os.path.join(folder, name))))
             # if xs is not None and ys is not None:
             #     break
-        print('Before unique', xs.shape, ys.shape)
         xs, index = np.unique(xs, axis=0, return_index=True)
         ys = ys[index]
-        print('After unique', xs.shape, ys.shape)
-        # np.save(os.path.join(folder, 'unique_x.npy'), xs.astype(np.float32))
-        # np.save(os.path.join(folder, 'unique_y.npy'), ys.astype(np.float32))
-        # exit(0)
+        print('Dataset', xs.shape, ys.shape)
         return xs.astype(np.float32), ys.astype(np.float32)
-
-    def _export(self, folder: str = None) -> None:
-        folder = self.folder if folder is None else folder
-        t = time.time()
-        xs_f = os.path.join(folder, str(int(t)) + '_x.npy')
-        ys_f = os.path.join(folder, str(int(t)) + '_y.npy')
-        for name in os.listdir(folder):
-            if name.endswith('.txt'):
-                print('Export', name)
-                xs = []
-                ys = []
-                history = None
-                strategy = []
-                with open(os.path.join(folder, name), 'r') as f:
-                    while True:
-                        line = f.readline().strip()
-                        if len(line) < 3:
-                            break
-                        line = ''.join(x for x in line if x.isprintable())
-                        if line.startswith('[0m'):
-                            if history is not None:
-                                xs.append(self.to_observation(history))
-                                if len(strategy) == 2:
-                                    strategy.append(np.zeros((1326,), dtype=np.float32))
-                                    strategy.append(np.zeros((1326,), dtype=np.float32))
-                                elif len(strategy) == 3:
-                                    strategy.insert(2, np.zeros((1326,), dtype=np.float32))
-                                elif len(strategy) != 4:
-                                    assert False
-                                ys.append(strategy)
-                                strategy = []
-                            history = line[3:-3]
-                        else:
-                            strategy.append(list(map(lambda x: float(x), line.strip().split(' '))))
-        xs = np.array(xs).astype(np.float32)
-        ys = np.array(ys).astype(np.float32)
-        xs, index = np.unique(xs, axis=0, return_index=True)
-        ys = ys[index]
-        np.save(xs_f, xs)
-        np.save(ys_f, ys)
-
-    def to_observation(self, history: str) -> np.ndarray:
-        # MATCHSTATE:1:5:r300c/:|Js7s/Ac5d9d
-        states = history.split(':')
-        player = int(states[1])
-        board = states[-1].split('/')[1:]
-        in_cards = np.zeros((3, 4, 13), dtype=np.float32)
-        if len(board) >= 1:
-            for card in Card.from_str_list([board[0][:2], board[0][2:4], board[0][4:6]]):
-                in_cards[0][card.suit][card.rank] = 1.0
-        if len(board) >= 2:
-            card = Card.from_str(board[1])
-            in_cards[1][card.suit][card.rank] = 1.0
-        if len(board) >= 3:
-            card = Card.from_str(board[2])
-            in_cards[2][card.suit][card.rank] = 1.0
-        action_history = states[3]
-        current_player = 0
-        street = 0
-        max_num_actions_street = 6
-        in_action_history = np.zeros((4, 12, 5), dtype=np.float32)
-        is_all_in = False
-        for street_actions in action_history.split('/'):
-            num_action = [0, 0]
-            if street == 0:
-                is_check = False
-            else:
-                is_check = True
-            action = 0
-            for i in range(len(street_actions)):
-                if street_actions[i] == 'c':
-                    if is_all_in:
-                        action = 4 # all in
-                    elif is_check:
-                        action = 1 # check
-                    else:
-                        if street == 0:
-                            is_check = True
-                        action = 2 # call
-                if street_actions[i] == 'r':
-                    is_check = False
-                    if street_actions[i + 1:].startswith('20000'):
-                        action = 4 # all in
-                        is_all_in = True
-                    else:
-                        action = 3 # raise
-                    in_action_history[street][current_player * max_num_actions_street + num_action[current_player]][action] = 1
-                    num_action[current_player] += 1
-                    current_player = 1 - current_player
-            current_player = 1
-            street += 1
-
-        in_tensor = np.concatenate((in_cards.flatten(), in_action_history.flatten()))
-        return in_tensor
 
     def __len__(self):
         return self.length
 
     def __getitem__(self, index: int):
         return self._add_hole_cards(index // 1326, index % 1326)
+
+class IterablePokerDataset(IterableDataset):
+    def __init__(self, folder: str) -> None:
+        self.folder = folder
+        self.hole_cards_mapping: list[tuple[Card, Card]] = []
+        for i in range(52):
+            for j in range(i):
+                self.hole_cards_mapping.append((Card(rank_first_id=i), Card(rank_first_id=j)))
+
+    def _add_hole_cards(self, cards: np.ndarray, actions: np.ndarray, y: np.ndarray, hole_id: int) -> tuple[np.ndarray, np.ndarray]:
+        hole = self.hole_cards_mapping[hole_id]
+        hole_cards = np.zeros((1, 4, 13), dtype=np.float32)
+        hole_cards[0][hole[0].suit][hole[0].rank] = 1
+        hole_cards[0][hole[1].suit][hole[1].rank] = 1
+        return np.concatenate((np.concatenate((hole_cards, cards)).flatten(), actions.flatten())), y[hole_id]
+
+    def _to_hole_cards_input(self, raw_xs: np.ndarray, raw_ys: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+        xs = []
+        ys = []
+        for line_id in range(raw_xs.shape[0]):
+            for hole_id in range(raw_ys.shape[1]):
+                x, y = self._add_hole_cards(line_id, hole_id)
+                xs.append(x)
+                ys.append(y)
+        return np.array(xs), np.array(ys)
+
+    def __iter__(self):
+        info = get_worker_info()
+        for name in sorted(os.listdir(self.folder)):
+            if name.endswith('x.npy'):
+                xs = np.load(os.path.join(self.folder, name), mmap_mode='r')
+                ys = np.load(os.path.join(self.folder, name[:-5] + 'y.npy'), mmap_mode='r')
+                if info is None:
+                    start = 0
+                    end = xs.shape[0]
+                else:
+                    per_worker = int(np.ceil(xs.shape[0] / float(info.num_workers)))
+                    start = info.id * per_worker
+                    end = min(start + per_worker, xs.shape[0])
+                l = [i for i in range(start, end)]
+                random.shuffle(l)
+                for i in l:
+                    # if np.sum(xs[i][:156]) > 3:
+                    # if np.sum(xs[i]) > 0:
+                        # continue
+                    cards = xs[i][:156].reshape(3, 4, 13).copy()
+                    actions = xs[i][156:].reshape(4, 12, 5).copy()
+                    y = ys[i].copy()
+                    # for j in range(1326):
+                    #     yield self._add_hole_cards(cards, actions, y, j)
+                    for j in range(100):
+                        yield self._add_hole_cards(cards, actions, y, np.random.randint(0, 1326))
+
+class IterableRangePokerDataset(IterableDataset):
+    def __init__(self, folder: str) -> None:
+        self.folder = folder
+
+    def __iter__(self):
+        info = get_worker_info()
+        for name in sorted(os.listdir(self.folder)):
+            if name.endswith('r.npy'):
+                xs = np.load(os.path.join(self.folder, name[:-5] + 'x.npy'), mmap_mode='r')
+                ys = np.load(os.path.join(self.folder, name[:-5] + 'y.npy'), mmap_mode='r')
+                rs = np.load(os.path.join(self.folder, name[:-5] + 'r.npy'), mmap_mode='r')
+                if info is None:
+                    start = 0
+                    end = xs.shape[0]
+                else:
+                    per_worker = int(np.ceil(xs.shape[0] / float(info.num_workers)))
+                    start = info.id * per_worker
+                    end = min(start + per_worker, xs.shape[0])
+                l = [i for i in range(start, end)]
+                random.shuffle(l)
+                for i in l:
+                    if np.sum(xs[i][:156]) != 5:
+                        continue
+                    yield xs[i].copy(), ys[i].copy(), rs[i].copy()

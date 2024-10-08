@@ -1,6 +1,24 @@
 import torch
 from torch import nn
 
+class HUNLSuperviseSimpleModel(nn.Module):
+    def __init__(self):
+        nn.Module.__init__(self)
+        self.net = nn.Sequential(
+            nn.Linear(448, 256),
+            nn.ReLU(),
+            nn.Linear(256, 128),
+            nn.ReLU(),
+            nn.Linear(128, 64),
+            nn.ReLU(),
+            nn.Linear(64, 4),
+            nn.Softmax(),
+        )
+
+    def forward(self, x0, x1):
+        out = torch.cat((torch.flatten(x0, start_dim=1), torch.flatten(x1, start_dim=1)), dim=1)
+        return self.net(out)
+
 class HUNLSuperviseModel(nn.Module):
     def __init__(self):
         nn.Module.__init__(self)

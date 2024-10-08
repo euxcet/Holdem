@@ -9,6 +9,10 @@ export class SolverService {
     return request('/policy', params, 'post', 'json')
   }
 
+  static async getRangePolicy(params) {
+    return request('/range_policy', params, 'post', 'json')
+  }
+
   static async getDeepStackPolicy(params) {
     return request('/deepstack_policy', params, 'post', 'json')
   }
