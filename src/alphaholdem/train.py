@@ -32,7 +32,7 @@ def main():
     # ModelCatalog.register_custom_action_dist("ActionDist", TorchDeterministic)
 
     learned_policy = 'learned'
-    initial_policies = get_policies(cfg.self_play.rule_based_policies)
+    initial_policies = get_policies(cfg.self_play.rule_based_policies, cfg.policy)
     initial_policies.update({learned_policy: PolicySpec()})
 
     def select_policy(agent_id: str, episode: EpisodeV2, **kwargs):

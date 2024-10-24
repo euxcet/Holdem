@@ -1,10 +1,11 @@
+import os
 import numpy as np
 from ..heuristic_base import HeuristicBase
 
 class LeducCFRHeuristic(HeuristicBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.strategy = self.load_strategy('/home/clouduser/zcc/Holdem/strategy/leduc_nash.txt')
+        self.strategy = self.load_strategy(args[2]['nash'])
 
     def load_strategy(self, save_file: str) -> dict[str, list[float]]:
         result = dict()

@@ -4,7 +4,7 @@ from ..heuristic_base import HeuristicBase
 class RangeKuhnCFRHeuristic(HeuristicBase):
     def __init__(self, *args, **kwargs):
         if 'path' not in kwargs:
-            self.strategy = self.load_strategy('/home/clouduser/zcc/Holdem/strategy/kuhn_nash.txt')
+            self.strategy = self.load_strategy('./strategy/kuhn_nash.txt')
         else:
             self.strategy = self.load_strategy(kwargs['path'])
             kwargs.pop('path')

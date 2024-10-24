@@ -56,6 +56,6 @@ self_play:
   arena_runs: 1024
 
 policy:
-  alphaholdem: /home/clouduser/zcc/Holdem/checkpoint/38000_model/model.ckpt
-  leduc_cfr: /home/clouduser/zcc/Holdem/strategy/leduc_nash.txt
-  kuhn_cfr: /home/clouduser/zcc/Holdem/strategy/kuhn_nash.txt
+  alphaholdem: ./checkpoint/38000_model/model.ckpt
+  leduc_cfr: ./strategy/leduc_nash.txt
+  kuhn_cfr: ./strategy/kuhn_nash.txt

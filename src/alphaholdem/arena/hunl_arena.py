@@ -9,7 +9,8 @@ from .policy.hunl.deepstack_hunl_policy import DeepstackHunlPolicy
 # TODO: refactor
 class HunlArena():
     def __init__(self, model_path: str = './checkpoint/supervise/supervise.pt') -> None:
-        self.nash = DeepstackHunlPolicy(model_path=model_path)
+        self.nash = None
+        # self.nash = DeepstackHunlPolicy(model_path=model_path)
 
     @override
     @property
