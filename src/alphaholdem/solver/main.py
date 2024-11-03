@@ -24,6 +24,7 @@ origins = [
     "http://localhost",
     "http://localhost:18890",
     "http://103.170.5.183:18890",
+    "http://172.16.71.223:18890",
 ]
 
 app = FastAPI()
@@ -35,7 +36,7 @@ app.add_middleware(
     allow_headers=['*'],
 )
 
-deepstack_dataset = DeepStackDataset('/home/clouduser/zcc/Agent')
+deepstack_dataset = DeepStackDataset('./Agent')
 
 def pretty_floats(obj, ndigits=2):
     if isinstance(obj, float):

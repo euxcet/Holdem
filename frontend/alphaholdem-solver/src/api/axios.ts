@@ -5,7 +5,7 @@ import { getEffectiveTypeParameterDeclarations } from 'typescript';
 
 axios.defaults.timeout = 60000;
 
-axios.defaults.baseURL = 'http://103.170.5.183:18889'
+axios.defaults.baseURL = 'http://172.16.71.223:18889'
 
 axios.interceptors.response.use(
   response => {

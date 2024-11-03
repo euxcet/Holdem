@@ -1,6 +1,7 @@
 import numpy as np
 from typing_extensions import override
 from ..policy import Policy
+from ...cfr.strategy import Strategy
 from ....poker.component.observation import Observation
 
 class LookupLeducPolicy(Policy):
@@ -11,6 +12,16 @@ class LookupLeducPolicy(Policy):
         else:
             self.strategy_path = strategy_path
             self.policy = self._load_from_file(strategy_path)
+
+    def _reverse(self, policy: dict[str, list[float]]) -> dict[str, list[float]]:
+        return {x[0]: list(reversed(x[1])) for x in policy.items()}
+
+    def to_strategy(self) -> tuple[Strategy, Strategy]:
+        s0 = Strategy(0)
+        s0.load(self._reverse(self.policy))
+        s1 = Strategy(1)
+        s1.load(self._reverse(self.policy))
+        return (s0, s1)
 
     def _load_from_file(self, path: str) -> dict[str, list[float]]:
         result = dict()

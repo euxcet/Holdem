@@ -81,18 +81,18 @@ class SelfPlayCallback(DefaultCallbacks, ABC):
         result["win_rate_smooth"] = self.win_rate_window.average()
 
         if self.arena.nash_policy is not None:
-            mean, var = self.arena.policy_vs_policy(
+            ev, exploitability = self.arena.policy_vs_policy(
                 policy0=self.current_policy,
                 policy1=self.arena.nash_policy,
                 runs=self.arena_runs,
             )
-            result['win_rate_vs_nash'] = mean
-            result['win_rate_vs_nash_var'] = var
+            result['win_rate_vs_nash'] = ev
+            result['exploitability'] = exploitability[0]
 
     def log_result(self, algorithm: Algorithm, result: dict, policy: Policy) -> None:
         log.info(f"Iter={algorithm.iteration} win_rate={result['win_rate']}")
         if self.arena.nash_policy is not None:
-            log.info(f"win_rate_vs_nash={result['win_rate_vs_nash']}")
+            log.info(f"win_rate_vs_nash={result['win_rate_vs_nash']}  exploitability={result['exploitability']}")
         policy.log()
 
     def on_train_result(self, *, algorithm: Algorithm, result: dict, **kwargs) -> None:

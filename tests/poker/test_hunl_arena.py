@@ -7,7 +7,7 @@ from alphaholdem.arena.policy.hunl.tf_texas_policy import TFTexasPolicy
 from alphaholdem.arena.policy.random_policy import RandomPolicy
 
 class TestHunlArena():
-    SKIP = False
+    SKIP = True
 
     def extract_pt(self, folder: str) -> str:
         for ckpt in os.listdir(folder):

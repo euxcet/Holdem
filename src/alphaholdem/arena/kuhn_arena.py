@@ -31,6 +31,14 @@ class KuhnArena(Arena):
         assert type(policy) in [LookupKuhnPolicy, PPOKuhnPolicy, PPORangeKuhnPolicy]
 
     @override
+    def get_exploitability(self, policy: Policy) -> int:
+        self.validate_policy(policy)
+        if type(policy) in [PPOKuhnPolicy, PPORangeKuhnPolicy]:
+            policy = self._to_lookup_policy(policy.get_all_policy())
+        else:
+            return 0
+
+    @override
     def policy_vs_policy(
         self,
         policy0: Policy,
@@ -45,5 +53,4 @@ class KuhnArena(Arena):
             policy1 = self._to_lookup_policy(policy1.get_all_policy())
         ev0 = KuhnTree([policy0.policy, policy1.policy]).dfs_ev() * 50
         ev1 = -KuhnTree([policy1.policy, policy0.policy]).dfs_ev() * 50
-        print(ev0, ev1)
         return (ev0 + ev1) / 2, 0
