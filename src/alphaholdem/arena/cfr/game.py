@@ -6,7 +6,7 @@ def kuhn_eval(hc, board):
 
 def half_street_kuhn_rules():
     players = 2
-    deck = [Card(14,1),Card(13,1),Card(12,1)]
+    deck = [Card(13,1),Card(12,1),Card(11,1)]
     ante = 1
     blinds = None
     rounds = [RoundInfo(holecards=1,boardcards=0,betsize=1,maxbets=[1,0])]
@@ -26,7 +26,7 @@ def half_street_kuhn_publictree():
 
 def kuhn_rules():
     players = 2
-    deck = [Card(14,1),Card(13,1),Card(12,1)]
+    deck = [Card(13,1),Card(12,1),Card(11,1)]
     ante = 1
     blinds = None
     rounds = [RoundInfo(holecards=1,boardcards=0,betsize=1,maxbets=[1,1])]

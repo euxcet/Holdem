@@ -42,7 +42,7 @@ hyper:
   num_update_iter: 20
   win_rate_threshold: 100
   checkpoint_frequency: 10
-  checkpoint_num_to_keep: 10
+  checkpoint_num_to_keep: 1
   stop_timesteps_total: 2000000000
   stop_training_iteration: 400000
 
@@ -50,9 +50,9 @@ self_play:
   type: naive
   arena: leduc
   policy_type: leduc
-  rule_based_policies: [leduc_cfr]
+  rule_based_policies: []
   num_opponent_limit: 100
-  num_update_iter: 10000000
+  num_update_iter: 100000
   arena_runs: 8192
 
 policy:

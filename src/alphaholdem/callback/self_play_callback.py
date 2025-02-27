@@ -99,13 +99,9 @@ class SelfPlayCallback(DefaultCallbacks, ABC):
         self.current_policy = self.policy_type(model=algorithm.get_policy(self.POLICY_TO_LEARN).model)
         self.calc_metric(result, self.current_policy)
         self.log_result(algorithm, result, self.current_policy)
-
+        # update = self.update_counter.count()
+        # if update and self.update_counter.counter > 100:
+        #     self.new_policy(algorithm, result)
         if self.update_counter.count():
             self.new_policy(algorithm, result)
-
-        # if algorithm.iteration == 1:
-        #     self.new_policy(algorithm, result)
-        # else:
-        #     if self.update_counter.count():
-        #         self.new_policy(algorithm, result)
         result["learned_version"] = self.learned_version

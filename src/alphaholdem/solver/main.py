@@ -59,6 +59,7 @@ def export_policy(run: str, save_name: str):
                     if int(checkpoint_dir[11:]) > max_id:
                         max_id = int(checkpoint_dir[11:])
                         checkpoint = os.path.join(run, sub_dir, checkpoint_dir)
+    print(checkpoint)
     src_pt = os.path.join(checkpoint, 'policies', 'learned', 'model.pt')
     if not os.path.exists(src_pt):
         return {'result': 'Checkpoint not found'}

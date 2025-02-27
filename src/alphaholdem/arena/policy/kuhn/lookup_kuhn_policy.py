@@ -1,6 +1,7 @@
 import numpy as np
 from typing_extensions import override
 from ..policy import Policy
+from ...cfr.strategy import Strategy
 from ....poker.component.observation import Observation
 
 class LookupKuhnPolicy(Policy):
@@ -11,6 +12,16 @@ class LookupKuhnPolicy(Policy):
         else:
             self.strategy_path = strategy_path
             self.policy = self._load_from_file(strategy_path)
+
+    def _reverse(self, policy: dict[str, list[float]]) -> dict[str, list[float]]:
+        return {x[0]: list(reversed(x[1])) for x in policy.items()}
+
+    def to_strategy(self) -> tuple[Strategy, Strategy]:
+        s0 = Strategy(0)
+        s0.load(self._reverse(self.policy))
+        s1 = Strategy(1)
+        s1.load(self._reverse(self.policy))
+        return (s0, s1)
 
     def _load_from_file(self, path: str) -> dict[str, list[float]]:
         result = dict()
@@ -43,10 +54,12 @@ class LookupKuhnPolicy(Policy):
     def get_policy(self, env_obs: dict, game_obs: Observation) -> np.ndarray:
         cfr_policy = self.policy[self._get_history(env_obs)]
         policy = np.zeros(4)
-        # 0 check or fold
-        # 1 call or raise
-        policy[0 if env_obs['action_mask'][0] == 1 else 1] = cfr_policy[0]
-        policy[2 if env_obs['action_mask'][2] == 1 else 3] = cfr_policy[1]
+        # raise
+        policy[3] = cfr_policy[0]
+        # check or call
+        policy[1 if env_obs['action_mask'][1] == 1 else 2] = cfr_policy[1]
+        # fold
+        policy[0] = cfr_policy[2]
         return policy / sum(policy)
 
     @override

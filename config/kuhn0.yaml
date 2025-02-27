@@ -1,11 +1,11 @@
 game:
-  type: leduc
+  type: kuhn
   num_players: 2
-  showdown_street: turn
+  showdown_street: flop
   legal_raise_pot_size: []
-  num_runs: 20
-  initial_chips: 100
-  payoff_max: 15
+  num_runs: 1
+  initial_chips: 4
+  payoff_max: 2
   circular_train: false
   custom_board_cards: null
   num_action: 4
@@ -27,35 +27,34 @@ rllib:
   verbose: 2
 
 hyper:
-  model: hunl_conv
-  learning_rate: 0.00001
+  model: kuhn
+  learning_rate: 0.00005
   clip_param: 0.2
   entropy_coeff: 0.01
-  train_batch_size: 524288
-  sgd_minibatch_size: 4096
+  train_batch_size: 2048
+  sgd_minibatch_size: 128
   num_sgd_iter: 30
   kl_coeff: 0.2
   kl_target: 0.003
   vf_clip_param: 10.0
   vf_loss_coeff: 1.0
-  opponent_count: 4
   num_update_iter: 20
   win_rate_threshold: 100
   checkpoint_frequency: 10
-  checkpoint_num_to_keep: 10
+  checkpoint_num_to_keep: 1
   stop_timesteps_total: 2000000000
   stop_training_iteration: 400000
 
 self_play:
   type: naive
-  arena: leduc
-  policy_type: leduc
+  arena: kuhn
+  policy_type: kuhn
   rule_based_policies: []
-  num_opponent_limit: 1
-  num_update_iter: 10000000
-  arena_runs: 2048
+  num_opponent_limit: 40
+  num_update_iter: 10
+  arena_runs: 16384
 
 policy:
-  alphaholdem: /home/clouduser/zcc/Holdem/checkpoint/38000_model/model.ckpt
-  leduc_nash: /home/clouduser/zcc/Holdem/strategy/leduc_nash.txt
-  kuhn_nash: /home/clouduser/zcc/Holdem/strategy/kuhn_nash.txt
+  alphaholdem: ./checkpoint/38000_model/model.ckpt
+  leduc_nash: ./strategy/leduc_nash.txt
+  kuhn_nash: ./strategy/kuhn_nash.txt
