@@ -2,7 +2,7 @@ import './assets/main.css'
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-import { Button, Cell, CellGroup, Field, Uploader, Notify, Form, Popup, Icon } from 'vant'
+import { Button, Cell, CellGroup, Field, Uploader, Notify, Form, Popup, Icon, Dialog } from 'vant'
 import 'vant/lib/index.css'
 
 import App from './App.vue'
@@ -20,6 +20,7 @@ app.use(Notify)
 app.use(Form)
 app.use(Popup)
 app.use(Icon)
+app.use(Dialog)
 app.use(router)
 
 app.mount('#app')

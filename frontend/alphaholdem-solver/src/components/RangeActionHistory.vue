@@ -1,12 +1,30 @@
 <template>
     <div class="board-card-row">
-        <div class="board-card-container" v-for="cardIndex in [0, 1, 2, 3, 4]">
+        <div class="board-card-container" v-for="cardIndex in [0, 1, 2, 3, 4]"
+             @click="show_dialog(cardIndex)">
             <div v-if="cardIndex < board_cards.length" class="board-card" :class="'board-card-' + board_cards[cardIndex][1]">
                 {{ board_cards[cardIndex][0] }}
             </div>
             <div v-else class="board-card"> ? </div>
         </div>
     </div>
+    <van-dialog
+        v-model:show="board_card_dialog"
+        title="Change the board card to:"
+        show-cancel-button
+        @confirm="change_board_card"
+    >
+        <van-field
+            v-model="new_board_card"
+            autosize
+            maxlength="2"
+            rows="1"
+            type="textarea"
+            placeholder="New card"
+            @keydown.enter.prevent
+        >
+        </van-field>
+    </van-dialog>
     <div class="observation-row">
         <div :class="'action-container action-container' + (obsIndex == current_step ? '-s' : '')"
             v-for="(observation, obsIndex) in observation_history" :key="obsIndex"
@@ -22,7 +40,7 @@
             <div class="action-block-container">
                 <div v-for="(action, actionIndex) in format_legal_actions(observation)"
                     :key="actionIndex" @click="perform_action(obsIndex, action[0])"
-                    :class="'action-block action-block' + (action_history[obsIndex] == action[0] ? '-s' : '')" 
+                    :class="'action-block action-block' + (action_history[obsIndex] == action[0] ? '-s' : '')"
                     @mouseover="actionMouseOver(obsIndex, action[0])"
                     @mouseleave="actionMouseLeave(obsIndex, action[0])">
                     {{ action[1] }}
@@ -34,9 +52,16 @@
 
 <script setup lang="ts">
 
+import { ref } from 'vue'
 import { useRangeStore } from '@/stores/range'
 import { storeToRefs } from 'pinia'
 const rangeStore = useRangeStore()
+
+const board_card_dialog = ref(false)
+const new_board_card = ref("")
+const input_field_ref = ref()
+
+let board_card_id = 0
 
 const {
     action_history,
@@ -65,6 +90,29 @@ async function perform_action(obsIndex: number, actionIndex: number) {
 
 async function switch_obs(obsIndex: number) {
     rangeStore.switch_obs(obsIndex)
+}
+
+async function show_dialog(cardIndex: number) {
+    board_card_id = cardIndex
+    board_card_dialog.value = true
+}
+
+async function change_board_card() {
+    let rank = ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A']
+    let suit = ['s', 'd', 'c', 'h']
+    if (board_card_id < 5 && new_board_card.value.length == 2) {
+        let card = new_board_card.value
+        var vis = false
+        for (var i = 0; i < 5; i++) {
+            if (i != board_card_id && board_cards.value[i] == card) {
+                vis = true
+            }
+        }
+        if (!vis && rank.includes(card[0]) && suit.includes(card[1])) {
+            board_cards.value[board_card_id] = card
+        }
+    }
+    new_board_card.value = ""
 }
 
 function format_legal_actions(observation) {
@@ -177,6 +225,7 @@ function format_legal_actions(observation) {
     margin-right: 10px;
     text-align: center;
     border-radius: 6px;
+    cursor: pointer;
 }
 
 .board-card-s {
