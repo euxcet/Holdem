@@ -36,10 +36,13 @@
 
 <script setup lang="ts">
 
+import { useRoute } from 'vue-router'
 import { useTexasStore } from '@/stores/texas'
 import { storeToRefs } from 'pinia'
+
+const route = useRoute()
 const texasStore = useTexasStore()
-texasStore.reset()
+texasStore.reset(route.params.id)
 
 const {
     action_history,

@@ -9,7 +9,7 @@ from ray.rllib.policy.policy import PolicySpec
 from ray.rllib.evaluation.episode_v2 import EpisodeV2
 from ray.rllib.models.torch.torch_action_dist import TorchDeterministic
 from ray.tune import register_env
-from ray.air.integrations.wandb import WandbLoggerCallback
+# from ray.air.integrations.wandb import WandbLoggerCallback
 
 from .model import get_model
 from .callback import get_callback
@@ -89,7 +89,7 @@ def main():
         param_space=config,
         run_config=air.RunConfig(
             callbacks= [
-                WandbLoggerCallback(project=env_name)
+                # WandbLoggerCallback(project=env_name)
             ],
             stop={
                 "timesteps_total": cfg.hyper.stop_timesteps_total,

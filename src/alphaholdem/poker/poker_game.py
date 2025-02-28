@@ -434,9 +434,9 @@ class PokerGame():
         need_to_deal = self.num_street_board_cards[self.street.value - 1]
         already_dealed = sum(self.num_street_board_cards[:self.street.value - 1])
         if self.custom_board_cards is not None and len(self.custom_board_cards) >= already_dealed + need_to_deal:
-            self.board_cards.extend(self.custom_board_cards[already_dealed:already_dealed + need_to_deal])
+            self.board_cards.extend(sorted(self.custom_board_cards[already_dealed:already_dealed + need_to_deal], reverse=True))
         else:
-            self.board_cards.extend(self.dealer.deal(need_to_deal))
+            self.board_cards.extend(sorted(self.dealer.deal(need_to_deal), reverse=True))
 
     def _calculate_payoff(self) -> list[float]:
         if len(self.board_cards) == self.num_board_cards:

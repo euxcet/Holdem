@@ -75,6 +75,22 @@ class NoLimitTexasHoldemEnv(PokerGameEnv):
     def observe(self, agent: str) -> dict:
         observation = self.game.observe(self._agent_id_to_game_id(self._agent_name_to_id(agent)))
         cards = np.zeros((4, 4, 13), np.float32)
+        # Fixed suit
+        suit_dict = {}
+        suit_c = 0
+        for board_card in observation.board_cards:
+            if board_card.suit not in suit_dict:
+                suit_dict[board_card.suit] = suit_c
+                suit_c += 1
+        for hole_card in observation.hole_cards:
+            if hole_card.suit not in suit_dict:
+                suit_dict[hole_card.suit] = suit_c
+                suit_c += 1
+        for i in range(len(observation.board_cards)):
+            observation.board_cards[i].suit = suit_dict[observation.board_cards[i].suit]
+        for i in range(len(observation.hole_cards)):
+            observation.hole_cards[i].suit = suit_dict[observation.hole_cards[i].suit]
+
         for hole_card in observation.hole_cards:
             cards[0][hole_card.suit][hole_card.rank] = 1.0
         for id, board_card in enumerate(observation.board_cards):

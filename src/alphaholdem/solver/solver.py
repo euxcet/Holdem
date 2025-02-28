@@ -1,8 +1,8 @@
+import os
+import math
 import torch
 import numpy as np
 from ..model.hunl_conv_model import HUNLConvModel
-from ..model.hunl_supervise_model import HUNLSuperviseModel, HUNLSuperviseSimpleModel
-from ..model.hunl_supervise_resnet import HUNLSuperviseResnet, HUNLSuperviseResnet50
 from ..poker.no_limit_texas_holdem_env import NoLimitTexasHoldemEnv
 from ..poker.component.card import Card
 from ..poker.component.observation import Observation
@@ -13,52 +13,58 @@ class Solver():
         self,
         model_path: str,
         showdown_street: Street,
+        checkpoint: int,
     ) -> None:
-        self.model: HUNLSuperviseResnet = HUNLSuperviseResnet()
-        # self.model: HUNLConvModel = torch.load(model_path)
-        # self.model: HUNLSuperviseModel = HUNLSuperviseModel()
-        # self.model: HUNLSuperviseModel = HUNLSuperviseSimpleModel()
-        # self.model: HUNLSuperviseModel = HUNLSuperviseResnet50()
-        self.model.load_state_dict(torch.load(model_path))
+        model_with_checkpoint = model_path[:-3] + '_' + str(checkpoint) + '.pt'
+        if os.path.exists(model_with_checkpoint):
+            self.model: HUNLConvModel = torch.load(model_with_checkpoint)
+        else:
+            self.model: HUNLConvModel = torch.load(model_path)
+        print(type(self.model))
         self.model.to('cuda')
         self.model.eval()
         self.showdown_street = showdown_street
-        self.hole_card_tensor = self._create_hole_card_tensor()
-        
-    def _create_hole_card_tensor(self) -> np.ndarray:
-        tensor = np.zeros((1326, 1, 4, 13), dtype=np.float32)
-        hole_id = 0
+
+    def map_suit(self, card0: Card, card1: Card, suit_dict: dict, suit_c: int):
+        if card0.suit not in suit_dict:
+            suit_dict[card0.suit] = suit_c
+            suit_c += 1
+        if card1.suit not in suit_dict:
+            suit_dict[card1.suit] = suit_c
+            suit_c += 1
+        card0.suit = suit_dict[card0.suit]
+        card1.suit = suit_dict[card1.suit]
+        return card0, card1
+
+    def get_range_policy(self, obs: dict, suit_dict: dict, suit_c: int) -> list[list]:
+        policy = []
         for i in range(52):
             for j in range(i + 1, 52):
-                card0 = Card(suit_first_id=i)
-                card1 = Card(suit_first_id=j)
+                # TODO: batch
+                card0, card1 = self.map_suit(Card(suit_first_id=i), Card(suit_first_id=j), suit_dict.copy(), suit_c)
                 for hole_card in [card0, card1]:
-                    tensor[hole_id][0][hole_card.suit][hole_card.rank] = 1.0
-                hole_id += 1
-        return tensor
+                    obs['obs']['observation'][0][0][hole_card.suit][hole_card.rank] = 1.0
+                prob = torch.exp(self.model(obs)[0])
+                prob = prob / torch.sum(prob)
+                prob = prob.detach().cpu().numpy().squeeze()
+                policy.append(prob)
+                for hole_card in [card0, card1]:
+                    obs['obs']['observation'][0][0][hole_card.suit][hole_card.rank] = 0.0
+        return np.array(policy)
 
-    def get_range_policy(self, cards: torch.Tensor, actions: torch.Tensor, action_mask: torch.Tensor) -> np.ndarray:
-        # print(obs['obs']['action_mask'].shape, obs['obs']['action_mask'])
-        can_check = action_mask[0][1] > 0.5
-        prob: np.ndarray = self.model(cards, actions).detach().cpu().numpy()
-        print(prob)
-        empty = np.zeros((prob.shape[0]), dtype=np.float32)
-        if can_check:
-            prob = np.stack((prob[:, 0], prob[:, 1], empty, prob[:, 3], prob[:, 2]), axis=1)
-        else:
-            prob = np.stack((prob[:, 0], empty, prob[:, 1], prob[:, 3], prob[:, 2]), axis=1)
-        return prob
 
     def query(
         self,
         board_cards: list[str],
         action_history: list[int],
     ) -> tuple[np.ndarray, Observation]:
+        board_cards: list[Card] = Card.from_str_list(board_cards)
+        board_cards = sorted(board_cards[:3], reverse=True) + board_cards[3:]
         env = NoLimitTexasHoldemEnv(
             num_players=2,
             initial_chips=200,
             showdown_street=self.showdown_street,
-            custom_board_cards=Card.from_str_list(board_cards),
+            custom_board_cards=board_cards,
             raise_pot_size=[1],
             legal_raise_pot_size=[1],
         )
@@ -68,15 +74,28 @@ class Solver():
         game_obs = env.game.observe_current()
         observation = env.observe_current()
 
-        cards = np.tile(observation['observation'][np.newaxis, 1:, :], (1326, 1, 1, 1))
-        cards = np.concatenate((self.hole_card_tensor, cards), axis=1)
-        actions = np.tile(observation['action_history'][np.newaxis, :], (1326, 1, 1, 1))
-        action_mask = np.tile(observation['action_mask'][np.newaxis, :], (1326, 1))
-        cards = torch.from_numpy(cards).to('cuda')
-        actions = torch.from_numpy(actions).to('cuda')
-        action_mask = torch.from_numpy(action_mask).to('cuda')
-        # cards:       1326 * 4 * 4 * 13
-        # actions:     1326 * 4 * 12 * 5
-        # action_mask: 1326 * 5
-        print(game_obs)
-        return self.get_range_policy(cards, actions, action_mask), game_obs
+        # Fixed suit
+        suit_dict = {}
+        suit_c = 0
+        num_board = 0
+        if game_obs.street == Street.Flop:
+            num_board = 3
+        elif game_obs.street == Street.Turn:
+            num_board = 4
+        elif game_obs.street == Street.River:
+            num_board = 5
+        for i in range(num_board):
+            if board_cards[i].suit not in suit_dict:
+                suit_dict[board_cards[i].suit] = suit_c
+                suit_c += 1
+        for i in range(num_board):
+            board_cards[i].suit = suit_dict[board_cards[i].suit]
+        obs = {
+            'obs': {
+                'observation': torch.from_numpy(observation['observation'])[np.newaxis, :].to('cuda'),
+                'action_history': torch.from_numpy(observation['action_history'])[np.newaxis, :].to('cuda'),
+                'action_mask': torch.from_numpy(observation['action_mask'])[np.newaxis, :].to('cuda'),
+            }
+        }
+        obs['obs']['observation'][0][0] = torch.zeros((4, 13))
+        return self.get_range_policy(obs, suit_dict, suit_c), game_obs

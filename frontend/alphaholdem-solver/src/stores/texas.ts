@@ -20,6 +20,7 @@ export const useTexasStore = defineStore('texas', {
             highlight_action: -1,
             running: false,
             num_actions: 0,
+            game_id: -1,
         }
     },
     actions: {
@@ -74,11 +75,16 @@ export const useTexasStore = defineStore('texas', {
             let response = (await SolverService.getPolicy({
                 "action_history": this.action_history,
                 "board_cards": this.board_cards,
+                "checkpoint": this.game_id,
             })).data
             return response
         },
 
-        async reset() {
+        async reset(game_id) {
+            console.log(game_id)
+            if (game_id !== undefined) {
+                this.game_id = parseInt(game_id)
+            }
             // policy_history.length == observation_history.length == action_history.length + 1 == max_step + 1
             this.overall_cell_name = this.get_overall_cell_name()
             this.overall_policy = this.empty_overall_policy()
