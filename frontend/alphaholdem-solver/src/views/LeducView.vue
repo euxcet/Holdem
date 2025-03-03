@@ -1,8 +1,3 @@
-<script setup lang="ts">
-import LeducActionHistory from '../components/LeducActionHistory.vue'
-import LeducPolicyTable from '../components/LeducPolicyTable.vue'
-</script>
-
 <template>
     <main>
         <LeducActionHistory />
@@ -10,5 +5,7 @@ import LeducPolicyTable from '../components/LeducPolicyTable.vue'
     </main>
 </template>
 
-<style>
-</style>
+<script setup lang="ts">
+import LeducActionHistory from '../components/LeducActionHistory.vue'
+import LeducPolicyTable from '../components/LeducPolicyTable.vue'
+</script>

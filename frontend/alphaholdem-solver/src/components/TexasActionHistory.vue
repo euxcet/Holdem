@@ -55,6 +55,7 @@
 import { ref } from 'vue'
 import { useTexasStore } from '@/stores/texas'
 import { storeToRefs } from 'pinia'
+
 const texasStore = useTexasStore()
 
 const board_card_dialog = ref(false)

@@ -27,6 +27,8 @@ class NoLimitTexasHoldemEnv(PokerGameEnv):
         raise_pot_size: list[float] = [0.5, 0.75, 1, 1.5, 2],
         legal_raise_pot_size: list[float] = [0.5, 0.75, 1, 1.5, 2],
         payoff_max: float = 200,
+        preflop_strategy: str = None,
+        give_strength: bool = False,
     ) -> None:
         game = NoLimitTexasHoldem(
             num_players=num_players,
@@ -36,6 +38,7 @@ class NoLimitTexasHoldemEnv(PokerGameEnv):
             custom_board_cards=custom_board_cards,
             raise_pot_size=raise_pot_size,
             legal_raise_pot_size=legal_raise_pot_size,
+            preflop_strategy=preflop_strategy,
         )
         super().__init__(
             num_players=num_players,
@@ -44,22 +47,29 @@ class NoLimitTexasHoldemEnv(PokerGameEnv):
             payoff_max=payoff_max,
         )
         self.max_num_actions_street = 6
+        self.give_strength = give_strength
+        space_dict = {
+            # 4(hole, flop, turn, river) * 4 * 13
+            'observation': spaces.Box(
+                low=0.0, high=1.0, shape=(4, 4, 13), dtype=np.float32
+            ),
+            # 4(preflop, flop, turn, river) * num_players * max_num_actions_street, 5(fold, check, call, raise, all_in)
+            'action_history': spaces.Box( 
+                low=0.0, high=5.0, shape=(4, num_players * self.max_num_actions_street, 5), dtype=np.float32
+            ),
+            'action_mask': spaces.Box(
+                low=0, high=1, shape=(self.game.action_shape,), dtype=np.int8
+            ),
+        }
+        if self.give_strength:
+            space_dict['strength'] = spaces.Box(
+                low=0, high=1, shape=(1,), dtype=np.float32
+            )
         self.observation_spaces = self._to_dict([
-            spaces.Dict({
-                # 4(hole, flop, turn, river) * 4 * 13
-                'observation': spaces.Box(
-                    low=0.0, high=1.0, shape=(4, 4, 13), dtype=np.float32
-                ),
-                # 4(preflop, flop, turn, river) * num_players * max_num_actions_street, 5(fold, check, call, raise, all_in)
-                'action_history': spaces.Box( 
-                    low=0.0, high=5.0, shape=(4, num_players * self.max_num_actions_street, 5), dtype=np.float32
-                ),
-                'action_mask': spaces.Box(
-                    low=0, high=1, shape=(self.game.action_shape,), dtype=np.int8
-                ),
-            }) for _ in range(self.num_agents)
+            spaces.Dict(space_dict) for _ in range(self.num_agents)
         ])
         # Fold Check Call All_in Raise_25% Raise_50% Raise_75% Raise_125%
+        # Fold Check Call All_in Raise_100%
         self.action_spaces = self._to_dict([spaces.Discrete(self.game.action_shape) for _ in range(self.num_agents)])
 
     def step(self, action: int) -> None:
@@ -86,20 +96,16 @@ class NoLimitTexasHoldemEnv(PokerGameEnv):
             if hole_card.suit not in suit_dict:
                 suit_dict[hole_card.suit] = suit_c
                 suit_c += 1
-        for i in range(len(observation.board_cards)):
-            observation.board_cards[i].suit = suit_dict[observation.board_cards[i].suit]
-        for i in range(len(observation.hole_cards)):
-            observation.hole_cards[i].suit = suit_dict[observation.hole_cards[i].suit]
 
         for hole_card in observation.hole_cards:
-            cards[0][hole_card.suit][hole_card.rank] = 1.0
+            cards[0][suit_dict[hole_card.suit]][hole_card.rank] = 1.0
         for id, board_card in enumerate(observation.board_cards):
             if id < 3: # Flop
-                cards[1][board_card.suit][board_card.rank] = 1.0
+                cards[1][suit_dict[board_card.suit]][board_card.rank] = 1.0
             elif id == 3:
-                cards[2][board_card.suit][board_card.rank] = 1.0
+                cards[2][suit_dict[board_card.suit]][board_card.rank] = 1.0
             elif id == 4:
-                cards[3][board_card.suit][board_card.rank] = 1.0
+                cards[3][suit_dict[board_card.suit]][board_card.rank] = 1.0
         # street, player, num_actions_street, action
         action_history = np.zeros((4, self.num_players * self.max_num_actions_street, 5), np.float32)
         action_street_count = [[0 for i in range(4)] for j in range(self.num_players)]
@@ -118,5 +124,10 @@ class NoLimitTexasHoldemEnv(PokerGameEnv):
         action_mask = np.zeros(self.game.action_shape, np.int8)
         for i in range(self.game.action_shape):
             action_mask[i] = 0 if observation.legal_actions[i] is None else 1
-        return {"observation": cards, "action_history": action_history, "action_mask": action_mask}
-        
+
+        if self.give_strength:
+            strength = np.array([self.game.judger.get_strength(self.game.dealer, observation.board_cards, observation.hole_cards)], np.float32)
+            return {"observation": cards, "action_history": action_history, "action_mask": action_mask, "strength": strength}
+        else:
+            return {"observation": cards, "action_history": action_history, "action_mask": action_mask}
+            

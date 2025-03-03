@@ -7,6 +7,7 @@ from ..poker.no_limit_texas_holdem_env import NoLimitTexasHoldemEnv
 from ..poker.component.card import Card
 from ..poker.component.observation import Observation
 from ..poker.component.street import Street
+from ..poker.utils.format_utils import trim_prob
 
 class RangeSolver():
     def __init__(
@@ -59,4 +60,4 @@ class RangeSolver():
             prob = np.stack((prob[:, 0], prob[:, 1], empty, prob[:, 3], prob[:, 2]), axis=1)
         else:
             prob = np.stack((prob[:, 0], empty, prob[:, 1], prob[:, 3], prob[:, 2]), axis=1)
-        return prob, game_obs
+        return trim_prob(prob), game_obs

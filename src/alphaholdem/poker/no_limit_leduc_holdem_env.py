@@ -71,6 +71,7 @@ class NoLimitLeducHoldemEnv(PokerGameEnv):
 
     def observe(self, agent: str) -> dict:
         observation = self.game.observe(self._agent_id_to_game_id(self._agent_name_to_id(agent)))
+        observation.hole_cards.sort(reverse=True)
         cards = np.zeros((4, 4, 13), np.float32)
         for hole_card in observation.hole_cards:
             cards[0][hole_card.suit][hole_card.rank] = 1.0

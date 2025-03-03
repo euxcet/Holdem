@@ -24,8 +24,13 @@ const router = createRouter({
       component: () => import('../views/StudyView.vue')
     },
     {
-      path: '/ppo/:id',
-      name: 'study_id',
+      path: '/ppo/:name',
+      name: 'ppo_name',
+      component: () => import('../views/StudyView.vue')
+    },
+    {
+      path: '/ppo/:name/:id',
+      name: 'ppo_name_id',
       component: () => import('../views/StudyView.vue')
     },
     {

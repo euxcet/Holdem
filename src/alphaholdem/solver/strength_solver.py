@@ -7,8 +7,10 @@ from ..poker.no_limit_texas_holdem_env import NoLimitTexasHoldemEnv
 from ..poker.component.card import Card
 from ..poker.component.observation import Observation
 from ..poker.component.street import Street
+from ..poker.component.dealer import Dealer
+from ..poker.component.judger import Judger
 
-class Solver():
+class StrengthSolver():
     def __init__(
         self,
         model_path: str,
@@ -38,20 +40,32 @@ class Solver():
         card1.suit = suit_dict[card1.suit]
         return card0, card1
 
-    def get_range_policy(self, obs: dict, suit_dict: dict, suit_c: int) -> list[list]:
+    def get_range_policy(
+        self,
+        judger: Judger,
+        dealer: Dealer,
+        board_cards: list[Card],
+        obs: dict,
+        suit_dict: dict,
+        suit_c: int
+    ) -> list[list]:
         policy = []
+        strength = judger.get_all_strength(dealer, board_cards)
+        cnt = 0
         for i in range(52):
             for j in range(i + 1, 52):
                 # TODO: batch
                 card0, card1 = self.map_suit(Card(suit_first_id=i), Card(suit_first_id=j), suit_dict.copy(), suit_c)
                 for hole_card in [card0, card1]:
                     obs['obs']['observation'][0][0][hole_card.suit][hole_card.rank] = 1.0
+                obs['obs']['strength'][0][0] = strength[cnt]
                 prob = torch.exp(self.model(obs)[0])
                 prob = prob / torch.sum(prob)
                 prob = prob.detach().cpu().numpy().squeeze()
                 policy.append(prob)
                 for hole_card in [card0, card1]:
                     obs['obs']['observation'][0][0][hole_card.suit][hole_card.rank] = 0
+                cnt += 1
         return np.array(policy)
 
 
@@ -95,7 +109,8 @@ class Solver():
                 'observation': torch.from_numpy(observation['observation'])[np.newaxis, :].to('cuda'),
                 'action_history': torch.from_numpy(observation['action_history'])[np.newaxis, :].to('cuda'),
                 'action_mask': torch.from_numpy(observation['action_mask'])[np.newaxis, :].to('cuda'),
+                'strength': torch.from_numpy(np.array([0], dtype=np.float32)[np.newaxis, :]).to('cuda'),
             }
         }
         obs['obs']['observation'][0][0] = torch.zeros((4, 13))
-        return self.get_range_policy(obs, suit_dict, suit_c), game_obs
+        return self.get_range_policy(env.game.judger, env.game.dealer, board_cards, obs, suit_dict, suit_c), game_obs

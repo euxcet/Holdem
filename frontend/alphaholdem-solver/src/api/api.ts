@@ -9,6 +9,14 @@ export class SolverService {
     return request('/policy', params, 'post', 'json')
   }
 
+  static async getFixPreflopPolicy(params) {
+    return request('/fix_preflop_policy', params, 'post', 'json')
+  }
+
+  static async getStrengthPolicy(params) {
+    return request('/strength_policy', params, 'post', 'json')
+  }
+
   static async getRangePolicy(params) {
     return request('/range_policy', params, 'post', 'json')
   }

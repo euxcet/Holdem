@@ -20,7 +20,8 @@ export const useTexasStore = defineStore('texas', {
             highlight_action: -1,
             running: false,
             num_actions: 0,
-            game_id: -1,
+            epoch_id: -1,
+            policy_name: "",
         }
     },
     actions: {
@@ -72,18 +73,29 @@ export const useTexasStore = defineStore('texas', {
         },
 
         async get_policy(): dict {
-            let response = (await SolverService.getPolicy({
+            let params = {
                 "action_history": this.action_history,
                 "board_cards": this.board_cards,
-                "checkpoint": this.game_id,
-            })).data
-            return response
+                "epoch": this.epoch_id,
+            }
+            if (this.policy_name === 'normal') {
+                return (await SolverService.getPolicy(params)).data
+            }
+            else if (this.policy_name == 'fix_preflop') {
+                return (await SolverService.getFixPreflopPolicy(params)).data
+            }
+            else if (this.policy_name == 'strength') {
+                return (await SolverService.getStrengthPolicy(params)).data
+            }
+            return (await SolverService.getPolicy(params)).data
         },
 
-        async reset(game_id) {
-            console.log(game_id)
-            if (game_id !== undefined) {
-                this.game_id = parseInt(game_id)
+        async reset(epoch_id, policy_name) {
+            if (epoch_id !== undefined) {
+                this.epoch_id = parseInt(epoch_id)
+            }
+            if (policy_name !== undefined) {
+                this.policy_name = policy_name
             }
             // policy_history.length == observation_history.length == action_history.length + 1 == max_step + 1
             this.overall_cell_name = this.get_overall_cell_name()
@@ -92,7 +104,7 @@ export const useTexasStore = defineStore('texas', {
             this.detail_policy = this.empty_detail_policy()
             this.action_history = []
             this.policy_history = []
-            this.board_cards = ['Qh', '3h', 'As', '3s', 'Qs']
+            this.board_cards = ['9h', '7d', '3d', '5h', 'Ks']
             let response = await this.get_policy()
             this.num_actions = response.policy[0].length
             this.policy_history.push(response.policy)

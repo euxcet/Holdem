@@ -1,8 +1,3 @@
-<script setup lang="ts">
-import RangeActionHistory from '../components/RangeActionHistory.vue'
-import RangePolicyTable from '../components/RangePolicyTable.vue'
-</script>
-
 <template>
     <main>
         <RangeActionHistory />
@@ -10,5 +5,7 @@ import RangePolicyTable from '../components/RangePolicyTable.vue'
     </main>
 </template>
 
-<style>
-</style>
+<script setup lang="ts">
+import RangeActionHistory from '../components/RangeActionHistory.vue'
+import RangePolicyTable from '../components/RangePolicyTable.vue'
+</script>

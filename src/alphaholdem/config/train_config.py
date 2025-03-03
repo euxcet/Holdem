@@ -14,6 +14,8 @@ class TrainConfig():
             circular_train: bool,
             custom_board_cards: list[str],
             num_action: int,
+            preflop_strategy: str,
+            give_strength: bool,
         ) -> None:
             from ..poker.component.street import Street
             self.type = type
@@ -26,6 +28,8 @@ class TrainConfig():
             self.circular_train = circular_train
             self.custom_board_cards = custom_board_cards
             self.num_action = num_action
+            self.preflop_strategy = preflop_strategy
+            self.give_strength = give_strength
 
         @staticmethod
         def load_from_dict(data: dict | None) -> TrainConfig.TrainGameConfig:
@@ -41,6 +45,8 @@ class TrainConfig():
                 circular_train=data.get('circular_train'),
                 custom_board_cards=data.get('custom_board_cards'),
                 num_action=data.get('num_action'),
+                preflop_strategy=data.get('preflop_strategy'),
+                give_strength=data.get('give_strength'),
             )
 
     class TrainResourcesConfig():

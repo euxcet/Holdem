@@ -8,22 +8,28 @@ from ..poker.component.card import Card
 from ..poker.component.observation import Observation
 from ..poker.component.street import Street
 
-class Solver():
+class FixPreflopSolver():
     def __init__(
         self,
         model_path: str,
         showdown_street: Street,
         epoch: int,
+        preflop_strategy: str = None,
     ) -> None:
         model_with_epoch = model_path[:-3] + '_' + str(epoch) + '.pt'
         if os.path.exists(model_with_epoch):
             self.model: HUNLConvModel = torch.load(model_with_epoch)
         else:
             self.model: HUNLConvModel = torch.load(model_path)
-        print(type(self.model))
         self.model.to('cuda')
         self.model.eval()
         self.showdown_street = showdown_street
+        if preflop_strategy is None:
+            self.preflop_actions, self.preflop_prob = None, None
+        else:
+            self.preflop_actions, self.preflop_prob = \
+                np.load(os.path.join(preflop_strategy, 'actions.npy')), \
+                np.load(os.path.join(preflop_strategy, 'prob.npy'))
 
     def map_suit(self, card0: Card, card1: Card, suit_dict: dict, suit_c: int):
         if card0 < card1:
@@ -54,7 +60,6 @@ class Solver():
                     obs['obs']['observation'][0][0][hole_card.suit][hole_card.rank] = 0
         return np.array(policy)
 
-
     def query(
         self,
         board_cards: list[str],
@@ -75,6 +80,14 @@ class Solver():
             env.step(action)
         game_obs = env.game.observe_current()
         observation = env.observe_current()
+        if game_obs.street == Street.Preflop and self.preflop_actions is not None:
+            action_history = observation['action_history']
+            prob = None
+            for i in range(self.preflop_actions.shape[0]):
+                if (action_history == self.preflop_actions[i]).all():
+                    prob = self.preflop_prob[i]
+            if prob is not None:
+                return prob, game_obs
 
         # Fixed suit
         suit_dict = {}
@@ -98,4 +111,5 @@ class Solver():
             }
         }
         obs['obs']['observation'][0][0] = torch.zeros((4, 13))
+        print('run model')
         return self.get_range_policy(obs, suit_dict, suit_c), game_obs

@@ -1,6 +1,75 @@
 import numpy as np
 from ..component.card import Card
 
+def trim_prob(prob: np.ndarray, threshold: float = 0.2) -> np.ndarray:
+    one_dim = False
+    if len(prob.shape) == 1:
+        one_dim = True
+        prob = prob[np.newaxis, :]
+    for i in range(prob.shape[0]):
+        max_i = np.where(prob[i] == np.max(prob[i]))[0][0]
+        for j in range(prob.shape[1]):
+            if prob[i][j] < threshold:
+                prob[i][max_i] += prob[i][j]
+                prob[i][j] = 0
+        prob[i][-1] = 1 - sum(prob[i][:-1])
+    if one_dim:
+        return prob[0]
+    return prob
+
+def deepstack_to_ppo_strategy(strategy: np.ndarray) -> np.ndarray:
+    result = []
+    mapping = {}
+    cnt = 0
+    for i in range(52):
+        for j in range(i):
+            mapping[(Card(rank_first_id=i).suit_first_id, Card(rank_first_id=j).suit_first_id)] = cnt
+            mapping[(Card(rank_first_id=j).suit_first_id, Card(rank_first_id=i).suit_first_id)] = cnt
+            cnt += 1
+
+    for i in range(52):
+        for j in range(i + 1, 52):
+            result.append(strategy[mapping[(i, j)]])
+    return np.array(result)
+
+def rank_to_suit_strategy(strategy: np.ndarray) -> np.ndarray:
+    result = []
+    for i in range(1326):
+        result.append(strategy[Card(suit_first_id=i).rank_first_id])
+    return np.array(result)
+
+def suit_to_rank_strategy(strategy: np.ndarray) -> np.ndarray:
+    result = []
+    for i in range(1326):
+        result.append(strategy[Card(rank_first_id=i).suit_first_id])
+    return np.array(result)
+
+def down_to_up_strategy(strategy: np.ndarray) -> np.ndarray:
+    mapping = {}
+    cnt = 0
+    for i in range(52):
+        for j in range(i):
+            mapping[(i, j)] = cnt
+            cnt += 1
+    result = []
+    for i in range(52):
+        for j in range(i + 1, 52):
+            result.append(strategy[mapping[(j, i)]])
+    return np.array(result)
+
+def up_to_down_strategy(strategy: np.ndarray) -> np.ndarray:
+    mapping = {}
+    cnt = 0
+    for i in range(52):
+        for j in range(i + 1, 52):
+            mapping[(i, j)] = cnt
+            cnt += 1
+    result = []
+    for i in range(52):
+        for j in range(i):
+            result.append(strategy[mapping[(j, i)]])
+    return np.array(result)
+
 '''
     Tensor: [cards(4 * 4 * 13), actions(4 * 12 * 5)]
     Actions: fold check call raise all_in

@@ -4,6 +4,8 @@ import shutil
 
 while True:
     root = "/home/zhouchengchi/ray_results"
+    save_root = 'checkpoint/test'
+    os.makedirs(save_root, exist_ok=True)
     for run in sorted(os.listdir(root), reverse=True):
         if run.startswith('PPO'):
             run_folder = os.path.join(root, run)
@@ -18,8 +20,8 @@ while True:
                     if cid % 10 == 0:
                         print('Export', checkpoint)
                         run_folder = os.path.join(run_folder, checkpoint, 'policies', 'learned')
-                        shutil.copyfile(os.path.join(run_folder, 'model.pt'), 'checkpoint/test/model.pt')
-                        shutil.copyfile(os.path.join(run_folder, 'model.pt'), 'checkpoint/test/model_' + str(cid) + '.pt')
+                        shutil.copyfile(os.path.join(run_folder, 'model.pt'), os.path.join(save_root, 'model.pt'))
+                        shutil.copyfile(os.path.join(run_folder, 'model.pt'), os.path.join(save_root, 'model_' + str(cid) + '.pt'))
                     break
             break
     time.sleep(60)

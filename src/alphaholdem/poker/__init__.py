@@ -32,6 +32,8 @@ def get_poker_env(cfg: TrainConfig.TrainGameConfig):
             raise_pot_size=cfg.legal_raise_pot_size,
             legal_raise_pot_size=cfg.legal_raise_pot_size,
             payoff_max=cfg.payoff_max,
+            preflop_strategy=cfg.preflop_strategy,
+            give_strength=cfg.give_strength,
         ))
     elif cfg.type == 'leduc':
         return _wrap(LimitLeducHoldemEnv(

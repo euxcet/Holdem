@@ -1,5 +1,7 @@
 from .card import Card
 from .hand import Hand, HandType
+from .dealer import Dealer
+from copy import deepcopy
 
 class Judger():
 
@@ -98,3 +100,79 @@ class Judger():
                     if best_hand is None or hand > best_hand:
                         best_hand = hand
         return best_hand
+
+
+    def get_strength(
+        self,
+        dealer: Dealer,
+        board_cards: list[Card],
+        hole_cards: list[Card],
+    ) -> float:
+        # if len(board_cards) < 3:
+        #     return 0
+        num_runs = 1
+        if len(board_cards) == 5:
+            num_runs = 1
+
+        final = [[0, i] for i in range(1326)]
+        hole_id = 0
+        for _ in range(num_runs):
+            board = deepcopy(board_cards)
+            board.extend(dealer.deal_without_pop(5 - len(board)))
+
+            best_hands = []
+            cnt = 0
+            
+            for i in range(52):
+                for j in range(i + 1, 52):
+                    # TODO: batch
+                    card0, card1 = Card(suit_first_id=i), Card(suit_first_id=j)
+                    best_hands.append((self.get_best_hand([card0, card1], board), cnt))
+                    if (card0.rank_first_id == hole_cards[0].rank_first_id and card1.rank_first_id == hole_cards[1].rank_first_id) or \
+                       (card0.rank_first_id == hole_cards[1].rank_first_id and card1.rank_first_id == hole_cards[0].rank_first_id):
+                       hole_id = cnt
+                    cnt += 1
+            best_hands.sort()
+            for i in range(len(best_hands)):
+                final[best_hands[i][1]][0] += i
+            final.sort()
+        
+        for i in range(len(final)):
+            if final[i][1] == hole_id:
+                return 1.0 * i / (len(final) - 1)
+        return 0
+
+    def get_all_strength(
+        self,
+        dealer: Dealer,
+        board_cards: list[Card],
+    ) -> float:
+        # if len(board_cards) < 3:
+        #     return [0 for i in range(1326)]
+        num_runs = 1
+        if len(board_cards) == 5:
+            num_runs = 1
+
+        final = [[0, i] for i in range(1326)]
+        for _ in range(num_runs):
+            board = deepcopy(board_cards)
+            board.extend(dealer.deal_without_pop(5 - len(board)))
+
+            best_hands = []
+            cnt = 0
+            
+            for i in range(52):
+                for j in range(i + 1, 52):
+                    # TODO: batch
+                    card0, card1 = Card(suit_first_id=i), Card(suit_first_id=j)
+                    best_hands.append((self.get_best_hand([card0, card1], board), cnt))
+                    cnt += 1
+            best_hands.sort()
+            for i in range(len(best_hands)):
+                final[best_hands[i][1]][0] += i
+            final.sort()
+        
+        result = [0 for i in range(len(final))]
+        for i in range(len(final)):
+            result[final[i][1]] = 1.0 * i / (len(final) - 1)
+        return result

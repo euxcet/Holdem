@@ -40,9 +40,16 @@ import { useRoute } from 'vue-router'
 import { useTexasStore } from '@/stores/texas'
 import { storeToRefs } from 'pinia'
 
+const props = defineProps({
+    name: {
+        type: String,
+        default: 'normal',
+    }
+})
+
 const route = useRoute()
 const texasStore = useTexasStore()
-texasStore.reset(route.params.id)
+texasStore.reset(route.params.id, props.name)
 
 const {
     action_history,

@@ -24,7 +24,7 @@ class TestHunlArena():
 
     @pytest.mark.skipif(SKIP, reason="SKIP == True")
     def test_cfr(self):
-        # ppos = PPOHunlPolicy.load_policies_from_run('/home/clouduser/ray_results/PPO_2024-09-01_12-07-04')
+        ppos = PPOHunlPolicy.load_policies_from_run('/home/clouduser/ray_results/PPO_2024-09-01_12-07-04')
         # tf = TFTexasPolicy('/home/clouduser/zcc/checkpoint/38000_model/model.ckpt')
         # arena = HunlArena('./checkpoint/supervise/small_v1/supervise.pt')
         random = RandomPolicy()

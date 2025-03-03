@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import math
 import numpy as np
 from numpy.random import Generator
@@ -15,6 +16,7 @@ from .component.street import Street
 from .component.player_name import get_players_name
 from .agent.agent import Agent
 from .agent.random_agent import RandomAgent
+from .utils.format_utils import trim_prob
 from ..utils.logger import log
 
 # TODO: refactor
@@ -47,6 +49,7 @@ class PokerGame():
         num_street_board_cards: list[int] = [3, 1, 1],
         action_shape: int = None,
         street_start_player: int = 0,
+        preflop_strategy: str = None,
     ) -> None:
         self.verbose = verbose
         self.num_players = num_players
@@ -77,6 +80,12 @@ class PokerGame():
             self.initial_chips = [initial_chips] * num_players
         else:
             self.initial_chips = initial_chips
+        self.preflop_strategy = preflop_strategy
+        if preflop_strategy is not None:
+            self.preflop_actions = np.load(os.path.join(preflop_strategy, 'actions.npy'))
+            self.preflop_prob = np.load(os.path.join(preflop_strategy, 'prob.npy'))
+        else:
+            self.preflop_actions, self.preflop_prob = None, None
         self.reset()
 
     def reset(self, seed: int = None, rng: Generator = None) -> Observation:
@@ -143,9 +152,41 @@ class PokerGame():
                 self.player_street_bet[player] = blind
                 self.street_raise = blind
                 self.street_raise_delta = blind
-
         self.current_player = self.num_blinds % self.num_players
-        return self.observe(self.current_player)
+        return self.perform_preflop()
+
+    def perform_preflop(self) -> Observation:
+        combo_mapping = dict()
+        cnt = 0
+        for i in range(52):
+            for j in range(i + 1, 52):
+                combo_mapping[(i, j)] = cnt
+                combo_mapping[(j, i)] = cnt
+                cnt += 1
+        observation = self.observe(self.current_player)
+        while observation.street == Street.Preflop and self.preflop_strategy is not None:
+            action_history = np.zeros((4, self.num_players * self.max_num_actions_street, 5), np.float32)
+            action_street_count = [[0 for i in range(4)] for j in range(self.num_players)]
+            for action in observation.log_action:
+                street = action.street.value
+                num_action = action_street_count[action.player][street]
+                if num_action >= self.max_num_actions_street:
+                    continue
+                if action.type == ActionType.Raise:
+                    action_history[street][action.player * self.max_num_actions_street + num_action][action.type.value] = action.raise_pot
+                else:
+                    action_history[street][action.player * self.max_num_actions_street + num_action][action.type.value] = 1
+                action_street_count[action.player][street] += 1
+            for i in range(self.preflop_actions.shape[0]):
+                if (self.preflop_actions[i] == action_history).all():
+                    hole = (observation.hole_cards[0].suit_first_id, observation.hole_cards[1].suit_first_id)
+                    prob = trim_prob(self.preflop_prob[i][combo_mapping[hole]])
+                    action = np.random.choice(prob.shape[0], p=prob)
+                    self.step(observation.legal_actions[action])
+                    action = 2
+                    observation = self.observe(self.current_player)
+                    break
+        return observation
 
     def _next_unfinished_player(self, player: int) -> int:
         player = player % self.num_players
